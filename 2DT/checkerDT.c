@@ -87,7 +87,6 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
 /* see checkerDT.h for specification */
 boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
                           size_t ulCount) {
-    char *temp;
     if (!bIsInitialized) {
         if (ulCount != 0) {
             fprintf(stderr, "Not initialized, but count is not 0\n");
@@ -98,13 +97,15 @@ boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
             return FALSE;
         }
     } else {
-        if (ulCount != 0 && oNRoot == NULL) {
-            fprintf(stderr, "Initialized and non-empty, "
-                            "but root is still null\n");
-            return FALSE;
-        }
-        if (strlen(Path_getPathname(Node_getPath(oNRoot))) == 0) {
-            fprintf(stderr, "Root name is empty (initialized)");
+        if (ulCount != 0) {
+            if (oNRoot == NULL) {
+                fprintf(stderr, "Initialized and non-empty, "
+                                "but root is still null\n");
+                return FALSE;
+            }
+            if (strlen(Path_getPathname(Node_getPath(oNRoot))) == 0) {
+                fprintf(stderr, "Root name is empty (initialized)");
+            }
         }
     }
 
