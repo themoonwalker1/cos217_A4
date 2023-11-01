@@ -16,6 +16,8 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
     Node_T oNParent;
     Path_T oPNPath;
     Path_T oPPPath;
+    size_t index;
+    Node_T oNChild;
 
     /* Sample check: a NULL pointer is not a valid node */
     if (oNNode == NULL) {
@@ -23,12 +25,13 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
         return FALSE;
     }
 
-    /* Sample check: parent's path must be the longest possible
-       proper prefix of the node's path */
     oNParent = Node_getParent(oNNode);
     if (oNParent != NULL) {
         oPNPath = Node_getPath(oNNode);
         oPPPath = Node_getPath(oNParent);
+
+        /* Sample check: parent's path must be the longest possible
+           proper prefix of the node's path */
 
         if (Path_getSharedPrefixDepth(oPNPath, oPPPath) !=
             Path_getDepth(oPNPath) - 1) {
@@ -38,7 +41,28 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
                     Path_getPathname(oPNPath));
             return FALSE;
         }
+
+        /* Check if siblings have unique paths */
+        for (index = 0; index < Node_getNumChildren(oNParent); index++) {
+            if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
+                fprintf(stderr, "Failed to retrieve a sibling node\n");
+                return FALSE;
+            }
+
+            if (oNChild != oNNode) {
+                Path_T oSPath = Node_getPath(oNChild);
+
+                /* Compare the path of the current sibling with oNNode */
+                if (Path_comparePath(oSPath, oPNPath) == 0) {
+                    fprintf(stderr, "Siblings have non-unique paths: (%s) (%s)\n",
+                            Path_getPathname(oPNPath),
+                            Path_getPathname(oSPath));
+                    return FALSE;
+                }
+            }
+        }
     }
+
 
     return TRUE;
 }
