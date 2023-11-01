@@ -103,8 +103,10 @@ boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
                                 "but root is still null\n");
                 return FALSE;
             }
-            if (strlen(Path_getPathname(Node_getPath(oNRoot))) == 0) {
-                fprintf(stderr, "Root name is empty (initialized)");
+        } else {
+            if (oNRoot != NULL) {
+                fprintf(stderr, "Initialized and empty, "
+                                "but root is not null\n");
             }
         }
     }
