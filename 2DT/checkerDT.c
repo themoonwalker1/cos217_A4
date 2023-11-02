@@ -128,9 +128,29 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
     return TRUE;
 }
 
+
+/* Helper function to count nodes in the tree */
+static size_t CheckerDT_countNodes(Node_T oNNode) {
+    if (oNNode == NULL) {
+        return 0;
+    }
+    size_t count = 1; // Count the current node
+    size_t ulIndex;
+    for (ulIndex = 0; ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
+        Node_T oNChild = NULL;
+        int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
+        if (iStatus == SUCCESS) {
+            count += CheckerDT_countNodes(oNChild); // Recursively count children
+        }
+    }
+    return count;
+}
+
 /* see checkerDT.h for specification */
 boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
                           size_t ulCount) {
+    size_t temp;
+
     if (!bIsInitialized) {
         if (ulCount != 0) {
             fprintf(stderr, "Not initialized, but count is not 0\n");
@@ -143,18 +163,24 @@ boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
     } else {
         if (ulCount != 0) {
             if (oNRoot == NULL) {
-                fprintf(stderr, "Initialized and non-empty, "
-                                "but root is still null\n");
+                fprintf(stderr, "Initialized and non-empty, but root is still null\n");
                 return FALSE;
             }
         } else {
             if (oNRoot != NULL) {
-                fprintf(stderr, "Initialized and empty, "
-                                "but root is not null\n");
+                fprintf(stderr, "Initialized and empty, but root is not null\n");
+                return FALSE;
             }
         }
+    }
+    if (ulCount != (temp = CheckerDT_countNodes(oNRoot))) {
+        fprintf(stderr, "Actual node count (%lu) does not match the expected count (%lu)\n",
+                (unsigned long)temp, (unsigned long)ulCount);
+        return FALSE;
     }
 
     /* Now checks invariants recursively at each node from the root. */
     return CheckerDT_treeCheck(oNRoot);
 }
+
+
