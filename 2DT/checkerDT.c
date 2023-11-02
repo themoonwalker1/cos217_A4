@@ -60,6 +60,18 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
                     return FALSE;
                 }
             }
+
+            /* Check the order of children in the DynArray */
+            fprintf(stderr, "Order of children paths:\n");
+            for (index = 0; index < Node_getNumChildren(oNParent); index++) {
+                if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
+                    fprintf(stderr, "Failed to retrieve a sibling node\n");
+                    return FALSE;
+                }
+
+                Path_T oSPath = Node_getPath(oNChild);
+                fprintf(stderr, "\t%s\n", Path_getPathname(oSPath));
+            }
         }
     }
 
