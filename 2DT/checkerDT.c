@@ -134,13 +134,13 @@ static size_t CheckerDT_countNodes(Node_T oNNode) {
     if (oNNode == NULL) {
         return 0;
     }
-    size_t count = 1; // Count the current node
+    size_t count = 1;
     size_t ulIndex;
     for (ulIndex = 0; ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
         Node_T oNChild = NULL;
         int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
         if (iStatus == SUCCESS) {
-            count += CheckerDT_countNodes(oNChild); // Recursively count children
+            count += CheckerDT_countNodes(oNChild);
         }
     }
     return count;
