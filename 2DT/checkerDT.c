@@ -11,73 +11,62 @@
 #include "path.h"
 
 
-/* see checkerDT.h for specification */
-boolean CheckerDT_Node_isValid(Node_T oNNode) {
-    Node_T oNParent;
-    Path_T oPNPath;
-    Path_T oPPPath;
-    size_t index;
-    Node_T oNChild;
-
-    /* Sample check: a NULL pointer is not a valid node */
+/* Helper function to check if a node is not a NULL pointer */
+static boolean isNotNull(Node_T oNNode) {
     if (oNNode == NULL) {
         fprintf(stderr, "A node is a NULL pointer\n");
         return FALSE;
     }
+    return TRUE;
+}
 
-    oNParent = Node_getParent(oNNode);
+/* Helper function to check if parent's path is a proper prefix of the node's path */
+static boolean hasProperParentPath(Node_T oNNode) {
+    Node_T oNParent = Node_getParent(oNNode);
     if (oNParent != NULL) {
-        oPNPath = Node_getPath(oNNode);
-        oPPPath = Node_getPath(oNParent);
+        Path_T oPNPath = Node_getPath(oNNode);
+        Path_T oPPPath = Node_getPath(oNParent);
 
-        /* Sample check: parent's path must be the longest possible
-           proper prefix of the node's path */
-
-        if (Path_getSharedPrefixDepth(oPNPath, oPPPath) !=
-            Path_getDepth(oPNPath) - 1) {
-            fprintf(stderr,
-                    "P-C nodes don't have P-C paths: (%s) (%s)\n",
+        if (Path_getSharedPrefixDepth(oPNPath, oPPPath) != Path_getDepth(oPNPath) - 1) {
+            fprintf(stderr, "P-C nodes don't have P-C paths: (%s) (%s)\n",
                     Path_getPathname(oPPPath),
                     Path_getPathname(oPNPath));
             return FALSE;
         }
+    }
+    return TRUE;
+}
 
-        /* Check if siblings have unique paths */
-        for (index = 0; index < Node_getNumChildren(oNParent); index++) {
-            if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
-                fprintf(stderr, "Failed to retrieve a sibling node\n");
+/* Helper function to check if siblings have unique paths */
+static boolean hasUniqueSiblings(Node_T oNNode) {
+    Node_T oNParent = Node_getParent(oNNode);
+    for (size_t index = 0; index < Node_getNumChildren(oNParent); index++) {
+        Node_T oNChild;
+        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
+            fprintf(stderr, "Failed to retrieve a sibling node\n");
+            return FALSE;
+        }
+
+        if (oNChild != oNNode) {
+            Path_T oSPath = Node_getPath(oNChild);
+            if (Path_comparePath(oSPath, Node_getPath(oNNode)) == 0) {
+                fprintf(stderr, "Siblings have non-unique paths: (%s) (%s)\n",
+                        Path_getPathname(Node_getPath(oNNode)),
+                        Path_getPathname(oSPath));
                 return FALSE;
-            }
-
-            if (oNChild != oNNode) {
-                Path_T oSPath = Node_getPath(oNChild);
-
-                /* Compare the path of the current sibling with oNNode */
-                if (Path_comparePath(oSPath, oPNPath) == 0) {
-                    fprintf(stderr, "Siblings have non-unique paths: (%s) (%s)\n",
-                            Path_getPathname(oPNPath),
-                            Path_getPathname(oSPath));
-                    return FALSE;
-                }
-            }
-
-            /* Check the order of children in the DynArray */
-            fprintf(stderr, "Order of children paths:\n");
-            for (index = 0; index < Node_getNumChildren(oNParent); index++) {
-                if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
-                    fprintf(stderr, "Failed to retrieve a sibling node\n");
-                    return FALSE;
-                }
-
-                Path_T oSPath = Node_getPath(oNChild);
-                fprintf(stderr, "\t%s\n", Path_getPathname(oSPath));
             }
         }
     }
-
-
     return TRUE;
 }
+
+/* Main validation function */
+boolean CheckerDT_Node_isValid(Node_T oNNode) {
+    return isNotNull(oNNode) &&
+           hasProperParentPath(oNNode) &&
+           hasUniqueSiblings(oNNode);
+}
+
 
 /*
    Performs a pre-order traversal of the tree rooted at oNNode.
@@ -92,15 +81,13 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
     size_t ulIndex;
 
     if (oNNode != NULL) {
-
         /* Sample check on each node: node must be valid */
         /* If not, pass that failure back up immediately */
         if (!CheckerDT_Node_isValid(oNNode))
             return FALSE;
 
-        /* Recur on every child of oNNode */
-        for (ulIndex = 0;
-             ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
+        /* Check if children are in sorted order */
+        for (ulIndex = 0; ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
             Node_T oNChild = NULL;
             int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
 
@@ -111,14 +98,33 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
                 return FALSE;
             }
 
-            /* if recurring down one subtree results in a failed check
-               farther down, passes the failure back up immediately */
+            /* Check if the child is in the correct position (sorted order) */
+            if (ulIndex > 0) {
+                Node_T oNPrevChild = NULL;
+                int iPrevStatus = Node_getChild(oNNode, ulIndex - 1, &oNPrevChild);
+
+                if (iPrevStatus != SUCCESS) {
+                    fprintf(stderr, "Failed to retrieve the previous sibling node\n");
+                    return FALSE;
+                }
+
+                /* Compare the paths of the current child and the previous child */
+                if (Path_compareString(Node_getPath(oNChild), Path_getPathname(Node_getPath(oNPrevChild))) <= 0) {
+                    fprintf(stderr, "Children are not in sorted order\n");
+                    return FALSE;
+                }
+            }
+
+            /* If recurring down one subtree results in a failed check
+               farther down, pass the failure back up immediately */
             if (!CheckerDT_treeCheck(oNChild))
                 return FALSE;
         }
     }
+
     return TRUE;
 }
+
 
 /* see checkerDT.h for specification */
 boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
