@@ -43,18 +43,22 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
         }
 
         /* Check if siblings have unique paths */
-        for (index = 0; index < Node_getNumChildren(oNParent); index++) {
+        for (index = 0;
+             index < Node_getNumChildren(oNParent); index++) {
             if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
-                fprintf(stderr, "Failed to retrieve a sibling node\n");
+                fprintf(stderr,
+                        "Failed to retrieve a sibling node\n");
                 return FALSE;
             }
 
             if (oNChild != oNNode) {
                 Path_T oSPath = Node_getPath(oNChild);
 
-                /* Compare the path of the current sibling with oNNode */
+                /* Compare path of the current sibling with oNNode */
                 if (Path_comparePath(oSPath, oPNPath) == 0) {
-                    fprintf(stderr, "Siblings have non-unique paths: (%s) (%s)\n",
+                    fprintf(stderr,
+                            "Siblings have non-unique paths: "
+                            "(%s) (%s)\n",
                             Path_getPathname(oPNPath),
                             Path_getPathname(oSPath));
                     return FALSE;
@@ -82,48 +86,55 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
     size_t ulIndex;
 
     if (oNNode != NULL) {
+        return TRUE;
+    }
 
-        /* Sample check on each node: node must be valid */
-        /* If not, pass that failure back up immediately */
-        if (!CheckerDT_Node_isValid(oNNode))
+    /* Sample check on each node: node must be valid */
+    /* If not, pass that failure back up immediately */
+    if (!CheckerDT_Node_isValid(oNNode))
+        return FALSE;
+
+    /* Recur on every child of oNNode */
+    for (ulIndex = 0;
+         ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
+        Node_T oNChild = NULL;
+        int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
+
+        if (iStatus != SUCCESS) {
+            fprintf(stderr,
+                    "getNumChildren claims more children than "
+                    "getChild returns\n");
             return FALSE;
-
-        /* Recur on every child of oNNode */
-        for (ulIndex = 0;
-             ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
-            Node_T oNChild = NULL;
-            int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
-
-            if (iStatus != SUCCESS) {
-                fprintf(stderr,
-                        "getNumChildren claims more children than "
-                        "getChild returns\n");
-                return FALSE;
-            }
-
-
-            /* Check if the child is in the correct position (sorted order) */
-            if (ulIndex > 0) {
-                Node_T oNPrevChild = NULL;
-                int iPrevStatus = Node_getChild(oNNode, ulIndex - 1, &oNPrevChild);
-
-                if (iPrevStatus != SUCCESS) {
-                    fprintf(stderr, "Failed to retrieve the previous sibling node\n");
-                    return FALSE;
-                }
-
-                /* Compare the paths of the current child and the previous child */
-                if (Path_compareString(Node_getPath(oNChild), Path_getPathname(Node_getPath(oNPrevChild))) <= 0) {
-                    fprintf(stderr, "Children are not in sorted order\n");
-                    return FALSE;
-                }
-            }
-
-            /* if recurring down one subtree results in a failed check
-               farther down, passes the failure back up immediately */
-            if (!CheckerDT_treeCheck(oNChild))
-                return FALSE;
         }
+
+
+        /* Check if child is in the correct position (sorted order) */
+        if (ulIndex > 0) {
+            Node_T oNPrevChild = NULL;
+            int iPrevStatus = Node_getChild(oNNode, ulIndex - 1,
+                                            &oNPrevChild);
+
+            if (iPrevStatus != SUCCESS) {
+                fprintf(stderr,
+                        "Failed to retrieve the "
+                        "previous sibling node\n");
+                return FALSE;
+            }
+
+            /* Compare the paths of current child and previous child */
+            if (Path_compareString(Node_getPath(oNChild),
+                                   Path_getPathname(Node_getPath(
+                                           oNPrevChild))) <= 0) {
+                fprintf(stderr,
+                        "Children are not in sorted order\n");
+                return FALSE;
+            }
+        }
+
+        /* if recurring down one subtree results in a failed check
+           farther down, passes the failure back up immediately */
+        if (!CheckerDT_treeCheck(oNChild))
+            return FALSE;
     }
     return TRUE;
 }
@@ -136,7 +147,8 @@ static size_t CheckerDT_countNodes(Node_T oNNode) {
     }
     size_t count = 1;
     size_t ulIndex;
-    for (ulIndex = 0; ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
+    for (ulIndex = 0;
+         ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
         Node_T oNChild = NULL;
         int iStatus = Node_getChild(oNNode, ulIndex, &oNChild);
         if (iStatus == SUCCESS) {
@@ -157,25 +169,32 @@ boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
             return FALSE;
         }
         if (oNRoot != NULL) {
-            fprintf(stderr, "Not initialized, but root is not null\n");
+            fprintf(stderr,
+                    "Not initialized, but root is not null\n");
             return FALSE;
         }
     } else {
         if (ulCount != 0) {
             if (oNRoot == NULL) {
-                fprintf(stderr, "Initialized and non-empty, but root is still null\n");
+                fprintf(stderr,
+                        "Initialized and non-empty, "
+                        "but root is still null\n");
                 return FALSE;
             }
         } else {
             if (oNRoot != NULL) {
-                fprintf(stderr, "Initialized and empty, but root is not null\n");
+                fprintf(stderr,
+                        "Initialized and empty, "
+                        "but root is not null\n");
                 return FALSE;
             }
         }
     }
     if (ulCount != (temp = CheckerDT_countNodes(oNRoot))) {
-        fprintf(stderr, "Actual node count (%lu) does not match the expected count (%lu)\n",
-                (unsigned long)temp, (unsigned long)ulCount);
+        fprintf(stderr,
+                "Actual node count (%lu) does not "
+                "match the expected count (%lu)\n",
+                (unsigned long) temp, (unsigned long) ulCount);
         return FALSE;
     }
 
