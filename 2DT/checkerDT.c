@@ -69,26 +69,15 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
     return TRUE;
 }
 
-static boolean CheckerDT_sortedSiblings(Node_T oNNode, Node_T oNChild,
-                                        size_t ulIndex) {
+/* Checks whether oNPrevChild is "less than or equal to" oNChild. Return
+   TRUE if it is "less than or equal to", otherwise return FALSE.
+   Precondition: oNPrevChild and oNChild are not NULL. */
+static boolean
+CheckerDT_sortedSiblings(Node_T oNPrevChild, Node_T oNChild) {
 
-    Node_T oNPrevChild = NULL;
-
-    assert(oNNode != NULL);
+    assert(oNPrevChild != NULL);
     assert(oNChild != NULL);
 
-    if (ulIndex <= 0) {
-        return TRUE;
-    }
-
-    if (Node_getChild(oNNode, ulIndex - 1, &oNPrevChild) != SUCCESS) {
-        fprintf(stderr,
-                "Failed to retrieve the "
-                "previous sibling node\n");
-        return FALSE;
-    }
-
-    /* Compare the paths of current child and previous child */
     if (Path_compareString(Node_getPath(oNChild),
                            Path_getPathname(Node_getPath(
                                    oNPrevChild))) <= 0) {
@@ -134,8 +123,19 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
             return FALSE;
         }
 
+        Node_T oNPrevChild = NULL;
+
+        if (Node_getChild(oNNode, ulIndex - 1, &oNPrevChild) !=
+            SUCCESS) {
+            fprintf(stderr,
+                    "Failed to retrieve the "
+                    "previous sibling node\n");
+            return FALSE;
+        }
+
         /* Check if child is in the correct position (sorted order) */
-        if (!CheckerDT_sortedSiblings(oNNode, oNChild, ulIndex))
+        if (ulIndex > 0 &&
+            !CheckerDT_sortedSiblings(oNPrevChild, oNChild))
             return FALSE;
 
         /* if recurring down one subtree results in a failed check
@@ -147,7 +147,8 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
 }
 
 
-/* Helper function to count nodes in the tree */
+/* Counts and returns the actual number of nodes existing in the tree
+   with root oNNode. */
 static size_t CheckerDT_countNodes(Node_T oNNode) {
     size_t count = 1;
     size_t ulIndex;
