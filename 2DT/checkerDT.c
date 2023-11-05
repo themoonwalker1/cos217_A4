@@ -85,7 +85,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
 static boolean CheckerDT_treeCheck(Node_T oNNode) {
     size_t ulIndex;
 
-    if (oNNode != NULL) {
+    if (oNNode == NULL) {
         return TRUE;
     }
 
@@ -142,11 +142,13 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
 
 /* Helper function to count nodes in the tree */
 static size_t CheckerDT_countNodes(Node_T oNNode) {
+    size_t count = 1;
+    size_t ulIndex;
+
     if (oNNode == NULL) {
         return 0;
     }
-    size_t count = 1;
-    size_t ulIndex;
+
     for (ulIndex = 0;
          ulIndex < Node_getNumChildren(oNNode); ulIndex++) {
         Node_T oNChild = NULL;
