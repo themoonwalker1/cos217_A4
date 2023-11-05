@@ -13,7 +13,8 @@
 
 /* see checkerDT.h for specification */
 boolean CheckerDT_Node_isValid(Node_T oNNode) {
-    Node_T oNParent, oNChild;
+    Node_T oNParent = NULL;
+    Node_T oNChild = NULL;
     Path_T oPNPath, oPPPath, oSPath;
     size_t index;
 
@@ -46,8 +47,7 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
     /* Check if siblings have unique paths */
     for (index = 0;
          index < Node_getNumChildren(oNParent); index++) {
-        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS
-            || oNChild == NULL) {
+        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
             fprintf(stderr,
                     "Failed to retrieve a sibling node\n");
             return FALSE;
