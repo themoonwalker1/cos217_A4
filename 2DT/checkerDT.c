@@ -81,10 +81,7 @@ static boolean CheckerDT_sortedSiblings(Node_T oNNode, Node_T oNChild,
         return TRUE;
     }
 
-    int iPrevStatus = Node_getChild(oNNode, ulIndex - 1,
-                                    &oNPrevChild);
-
-    if (iPrevStatus != SUCCESS) {
+    if (Node_getChild(oNNode, ulIndex - 1, &oNPrevChild) != SUCCESS) {
         fprintf(stderr,
                 "Failed to retrieve the "
                 "previous sibling node\n");
