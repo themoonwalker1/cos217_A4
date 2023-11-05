@@ -81,7 +81,19 @@ your disagreements with them? Copy the splint warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
+checkerDT.c: (in function CheckerDT_Node_isValid)
+checkerDT.c:56:13: Variable oNChild used before definition
+  An rvalue is used that may not be initialized to a value on some execution
+  path. (Use -usedef to inhibit warning)
 
+  /* I disagree with this warning because oNChild is being defined
+     by the Node_getChild function by passing the address of oNChild.
+     Here is the line where it is defined:
+        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
+     This function
+
+
+  (+ other warnings for other files)
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on checkerDT.c, and what are your

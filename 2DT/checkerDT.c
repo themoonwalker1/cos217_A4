@@ -46,7 +46,8 @@ boolean CheckerDT_Node_isValid(Node_T oNNode) {
     /* Check if siblings have unique paths */
     for (index = 0;
          index < Node_getNumChildren(oNParent); index++) {
-        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
+        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS
+            || oNChild == NULL) {
             fprintf(stderr,
                     "Failed to retrieve a sibling node\n");
             return FALSE;
