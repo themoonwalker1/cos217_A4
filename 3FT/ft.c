@@ -61,7 +61,7 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
    oNCurr = oNRoot;
    ulDepth = Path_getDepth(oPPath);
    for(i = 2; i <= ulDepth; i++) {
-       boolean *pbIsFile = NULL;
+       boolean *pbIsFile = calloc(1, sizeof(boolean));
 
       iStatus = Path_prefix(oPPath, i, &oPPrefix);
       if(iStatus != SUCCESS) {
