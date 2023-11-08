@@ -145,12 +145,12 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
             return MEMORY_ERROR;
         }
 
-        psNew->bIsFile = TRUE;
+        psNew->bIsFile = FALSE;
         psNew->pvContents = NULL;
     } else {
         psNew->oDFiles = NULL;
         psNew->oDDirs = NULL;
-        psNew->bIsFile = FALSE;
+        psNew->bIsFile = TRUE;
         psNew->pvContents = pvContents;
     }
 
