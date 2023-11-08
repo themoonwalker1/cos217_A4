@@ -63,7 +63,6 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
     int iStatus;
 
     assert(oPPath != NULL);
-    assert(pvContents != NULL);
     assert(oNParent == NULL || CheckerFT_Node_isValid(oNParent));
 
     /* allocate space for a new node */
@@ -289,7 +288,6 @@ int NodeFT_getContents(NodeFT_T oNNode, void **ppvContents) {
 
 int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, void **ppvPrevContents) {
    assert(oNNode != NULL);
-   assert(pvContents != NULL);
    assert(ppvPrevContents != NULL);
 
    if (oNNode->bIsFile == FALSE) {
