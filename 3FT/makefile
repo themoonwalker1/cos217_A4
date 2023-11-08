@@ -19,11 +19,11 @@ path.o: path.c dynarray.h path.h a4def.h
 ft_client.o: ft_client.c ft.h a4def.h
 	$(GCC) $(FLAGS) -c $<
 
-checkerFT.o: checkerFT.c dynarray.h checkerFT.h nodeft.h path.h a4def.h
+checkerFT.o: checkerFT.c dynarray.h checkerFT.h nodeFT.h path.h a4def.h
 	$(GCC) $(FLAGS) -c $<
 
-nodeFT.o: nodeFT.c dynarray.h checkerFT.h nodeft.h path.h a4def.h
+nodeFT.o: nodeFT.c dynarray.h checkerFT.h nodeFT.h path.h a4def.h
 	$(GCC) $(FLAGS) -c $<
 
-ft.o: ft.c dynarray.h checkerFT.h nodeft.h ft.h path.h a4def.h
+ft.o: ft.c dynarray.h checkerFT.h nodeFT.h ft.h path.h a4def.h
 	$(GCC) $(FLAGS) -c $<
