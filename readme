@@ -81,19 +81,26 @@ your disagreements with them? Copy the splint warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
-checkerDT.c: (in function CheckerDT_Node_isValid)
-checkerDT.c:56:13: Variable oNChild used before definition
-  An rvalue is used that may not be initialized to a value on some execution
-  path. (Use -usedef to inhibit warning)
+Splint 3.1.2 --- 20 Aug 2022
 
-  /* I disagree with this warning because oNChild is being defined
-     by the Node_getChild function by passing the address of oNChild.
-     Here is the line where it is defined:
-        if (Node_getChild(oNParent, index, &oNChild) != SUCCESS) {
-     This function
+nodeDTGood.c: (in function Node_new)
+nodeDTGood.c:148:48: Variable ulIndex used before definition
+  An rvalue is used that may not be initialized to a value on some
+  execution path. (Use -usedef to inhibit warning)
+nodeDTGood.c: (in function Node_free)
+nodeDTGood.c:180:35: Variable ulIndex used before definition
+path.h:44:5: Function exported but not used outside path: Path_prefix
+  A declaration is exported, but not used outside this module.
+  Declaration can use static qualifier. (Use -exportlocal to inhibit
+  warning)
+path.c:235:1: Definition of Path_prefix
+path.h:94:13: Function exported but not used outside path:
+    Path_getComponent
+   path.c:316:1: Definition of Path_getComponent
 
+Finished checking --- 4 code warnings
 
-  (+ other warnings for other files)
+   /* None of these warnings are for checkerDT.c */
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on checkerDT.c, and what are your
@@ -101,7 +108,7 @@ disagreements with them? Copy the critTer warnings here, and express
 your disagreement after each warning. If there are no warnings, then
 write "None."
 
-
+None
 
 ------------------------------------------------------------------------
 What warnings does splint generate on your Part 3 code, and what are
@@ -143,7 +150,199 @@ the error manifests itself or is "noticed" by the client.
 ------------------------------------------------------------------------
 What are your critiques of the given DT implementations, as
 specified in Step 2.5?
+nodeDT.h:
+The parameter ordering in the function declarations should be consistent
+across functions. For example, in 'Node_new', you have 'Path_T oPPath,
+Node_T oNParent, Node_T *poNResult', but in 'Node_hasChild', you have
+'Node_T oNParent, Path_T oPPath, size_t *pulChildID'.
 
+Another potential change is to reorder the function declarations so that
+similar functions are grouped together. For example, all of the
+getters should be together (Node_hasChild currently separates some
+of them).
+nodeDTGood.c:
+    - Global Variables:
+        The name of the struct 'node' should be changed so that it
+        defines the purpose of the structure better. For example,
+        renaming it to TreeNode would specify that it is a Node in a
+        tree structure, whether it be a BT, DT, or FT. In this certain
+        scenario, calling it DTNode would also be fine as it only
+        contains the information that would be necessary for a DT
+        implementation.
+    - Node_addChild:
+        The else statement is unnecessary, and can be omitted with
+        'return MEMORY_ERROR' being the last line of the function.
+    - Node_compareString:
+        None
+    - Node_new:
+        Lines 94 to 123 should be refactored into a separate function
+        whose purpose is to validate the parent and child node
+        relationship. This would improve code readability and reduce
+        code complexity.
 
+        On line 128, there is a magic number '1' which should be defined
+        through a #define in the beginning with a name like 'ROOT_DEPTH'
+        This may also be defined in the a4def.h as it seems to appear in
+        other files as well.
+    - Node_free:
+        For the nested if statement, we can combine the conditions into
+        one if statement, with the inner if statement condition appended
+        to the outer condition with a '&&' operator. The second
+        condition would never be executed if the first one is false, so
+        the statement would work correctly. Also, adding the curly
+        brackets would improve readability.
+    - Node_getPath:
+        None
+    - Node_hasChild:
+        None
+    - Node_getNumChildren:
+        None
+    - Node_getChild:
+        Remove the double space in the function header between 'int' and
+        the function name.
+    - Node_getParent:
+        None
+    - Node_compare:
+        None
+    - Node_toString:
+        None
+dt.h:
+Reorder the function declarations so that they are in a more meaningful
+order. For example, the initialization and destroy functions should be
+at the top of the file (as they are in theory the most important),
+followed by insert, contains, and rm, with toString in the end.
+dtGood.c:
+    - Global Variables:
+        None
+    - DT_traversePath:
+        Maybe creating a enum variable (or do #define) for the value 1
+        (to remove "magic numbers") and using those variables to define
+        the root index and the starting index of the for loop (which
+        would be the enum value + 1).
 
+        Change the variable name 'i' to be more descriptive of the type
+        and functionality of the variable. ex: 'size_t ulIndex;'
+    - DT_findNode:
+        None
+    - DT_insert:
+        The DT_insert function is correctly implemented to insert a new
+        path into a data structure, but its readability is compromised
+        due to its length and complexity. Breaking down this function
+        into smaller, modular sub-functions would greatly enhance its
+        clarity without affecting its functionality. One particular
+        sub-function I would add would be for the while loop that goes
+        through each level, adding the parent nodes to the "original"
+        node trying to be inserted.
+
+        Maybe creating a enum variable (or do #define) for the value 1
+        and setting ulIndex to that enum value would be more readable
+        than doing:
+            'ulIndex = 1;'
+        (Similar to change in DT_traversePath, so #define is a more
+        viable option)
+    - DT_contains:
+        None
+    - DT_rm:
+        None
+    - DT_init:
+        None
+    - DT_destroy:
+        None
+    - DT_preOrderTraversal:
+        The parameter names and the variable 'c' do not adhere to good
+        coding conventions, as they lack descriptive names that clearly
+        indicate their purpose and the type of data they hold.
+        For instance, it would be more informative to use names like
+        'oNParent' for an object of type Node that stores the Parent
+        Node.
+
+        Using 'assert(iStatus == SUCCESS);' for error handling is not
+        ideal. Returning the error code (iStatus) to the calling
+        function is a more informative and user-friendly approach. AKA,
+        do the following:
+            if(iStatus != SUCCESS)
+                return iStatus;
+    - DT_strlenAccumulate:
+        None
+    - DT_strcatAccumulate:
+        The main purpose of this function is to be applied to each
+        node for the purpose of accumulating the string representation
+        of the tree. Within this function, the use of 'strcat' is
+        inefficient because it necessitates a search for the null
+        terminator each time it's called. A more efficient approach
+        would involve keeping track of the current insertion position
+        and directly appending the path toString to it. This improvement
+        enhances the program's efficiency and speed, but not the
+        complexity.
+    - DT_toString:
+        None
+path.c:
+    - Global Variables:
+    - Path_freeString:
+        None
+    - Path_split:
+        In the if statement on line 99, the pcCopy variable is not freed
+        during an error with adding pcCopy to oDSubstrings.
+
+        Lines 107 to 111 can be condensed by calling strncpy:
+            strncpy(pcCopy, pcStart, pcEnd - pcStart);
+            pcCopy[pcEnd - pcStart] = '\0';
+        This would help readability and consistency.
+    - Path_new:
+        None
+    - Path_prefix:
+        In the for loop at line 201, creating a separate helper function
+        for creating a deep copy would help make the code more readable.
+    - Path_dup:
+        None
+    - Path_free:
+        None
+    - Path_getPathname:
+        None
+    - Path_getStrLength:
+        None
+    - Path_comparePath:
+        None
+    - Path_compareString:
+        None
+    - Path_getDepth:
+        None
+    - Path_getSharedPrefixDepth:
+        None
+    - Path_getComponent:
+        None
+dynarray.c:
+    - Global Variables:
+        There are many magic numbers, such as '0' and '1' for return
+        values, that should be defined with a #define at the top of the
+        file with a fitting name. '0' could be 'MEMORY_ERROR' and '1'
+        could be 'SUCCESS'.
+    - DynArray_grow:
+    - DynArray_new:
+    - DynArray_free:
+    - DynArray_getLength:
+    - DynArray_get:
+    - DynArray_set :
+    - DynArray_add:
+    - DynArray_addAt:
+    - DynArray_removeAt:
+    - DynArray_toArray:
+        None
+    - DynArray_map:
+        None
+    - DynArray_qsort:
+        None
+    - Dynarray_sort:
+        A potential improvement to this function would be adding an
+        additional parameter that takes in a sorting function as a value
+        so that the user can define the sorting function themselves/use
+        other sorting functions (that would be) defined in dynarray.h.
+        This is because different scenarios require efficiency in
+        different aspects of sorting (like memory vs. speed).
+    - DynArray_search:
+        None
+    - DynArray_bsearchHelp:
+        None
+    - DynArray_bsearch:
+        None
 ------------------------------------------------------------------------
