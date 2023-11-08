@@ -70,7 +70,7 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
       }
 
       iStatus = NodeFT_hasChild(oNCurr, oPPrefix, pbIsFile, &ulChildID);
-      if(iStatus && pbIsFile == FALSE) {
+      if(iStatus == SUCCESS && pbIsFile == FALSE) {
          /* go to that child and continue with next prefix */
          Path_free(oPPrefix);
          oPPrefix = NULL;
@@ -81,7 +81,7 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
          }
          oNCurr = oNChild;
       }
-      else if (iStatus) {
+      else if (iStatus == SUCCESS) {
           *poNFurthest = NULL;
           return NOT_A_DIRECTORY;
       }
@@ -115,7 +115,6 @@ static int FT_findNode(const char *pcPath, NodeFT_T *poNResult) {
       *poNResult = NULL;
       return iStatus;
    }
-
    iStatus = FT_traversePath(oPPath, &oNFound);
    if(iStatus != SUCCESS)
    {
