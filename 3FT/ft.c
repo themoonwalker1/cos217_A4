@@ -275,7 +275,6 @@ int FT_insertFile(const char *pcPath, void *pvContents,
     NodeFT_T oNCurr = NULL;
     size_t ulDepth, ulIndex;
     size_t ulNewNodes = 0;
-    boolean bIsFile = TRUE;
 
     assert(pcPath != NULL);
     assert(CheckerFT_isValid(bIsInitialized, oNRoot, ulCount));
@@ -328,7 +327,7 @@ int FT_insertFile(const char *pcPath, void *pvContents,
         }
 
         /* insert the new node for this level */
-        iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents, bIsFile,
+        iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents, ulIndex == ulDepth,
                              &oNNewNode);
         if (iStatus != SUCCESS) {
             Path_free(oPPath);
