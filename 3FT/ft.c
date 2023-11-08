@@ -244,7 +244,7 @@ boolean FT_containsDir(const char *pcPath) {
     assert(pcPath != NULL);
 
     iStatus = FT_findNode(pcPath, &oNFound);
-    return (boolean) (iStatus == SUCCESS);
+    return (boolean) (iStatus == SUCCESS)  && (NodeFT_isFile(oNFound) == FALSE);
 }
 
 int FT_rmDir(const char *pcPath) {
@@ -366,7 +366,7 @@ boolean FT_containsFile(const char *pcPath) {
 
     iStatus = FT_findNode(pcPath, &oNFound);
 
-    return (boolean) (iStatus == SUCCESS);
+    return (boolean) (iStatus == SUCCESS) && (NodeFT_isFile(oNFound) == TRUE);
 }
 
 int FT_rmFile(const char *pcPath) {

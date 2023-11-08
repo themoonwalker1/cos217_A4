@@ -126,7 +126,7 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
 
     psNew->oNParent = oNParent;
 
-    if (bIsFile) {
+    if (bIsFile == FALSE) {
         /* initialize the new node */
         psNew->oDDirs = DynArray_new(0);
         if (psNew->oDDirs == NULL) {
