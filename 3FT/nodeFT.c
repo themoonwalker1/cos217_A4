@@ -203,7 +203,7 @@ size_t NodeFT_free(NodeFT_T oNNode) {
 
     /* remove from parent's list */
     if (oNNode->oNParent != NULL) {
-        if (oNNode->bIsFile == TRUE && DynArray_bsearch(
+        if (DynArray_bsearch(
                 NodeFT_getChildDynArray(oNNode->oNParent,
                                         oNNode->bIsFile),
                 oNNode, &ulIndex,
@@ -215,17 +215,21 @@ size_t NodeFT_free(NodeFT_T oNNode) {
                     ulIndex);
     }
 
-    /* recursively remove Files */
-    while (DynArray_getLength(oNNode->oDFiles) != 0) {
-        ulCount += NodeFT_free(DynArray_get(oNNode->oDFiles, 0));
-    }
-    DynArray_free(oNNode->oDFiles);
+    if (oNNode->bIsFile == FALSE) {
+        /* recursively remove Files */
+        while (DynArray_getLength(oNNode->oDFiles) != 0) {
+            ulCount += NodeFT_free(DynArray_get(oNNode->oDFiles, 0));
+        }
+        DynArray_free(oNNode->oDFiles);
 
-    /* recursively remove directories */
-    while (DynArray_getLength(oNNode->oDDirs) != 0) {
-        ulCount += NodeFT_free(DynArray_get(oNNode->oDDirs, 0));
+        /* recursively remove directories */
+        while (DynArray_getLength(oNNode->oDDirs) != 0) {
+            ulCount += NodeFT_free(DynArray_get(oNNode->oDDirs, 0));
+        }
+        DynArray_free(oNNode->oDDirs);
+    } else {
+        free(oNNode->pvContents);
     }
-    DynArray_free(oNNode->oDDirs);
 
     /* remove path */
     Path_free(oNNode->oPPath);
