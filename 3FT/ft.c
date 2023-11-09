@@ -181,6 +181,12 @@ int FT_insertDir(const char *pcPath) {
         return CONFLICTING_PATH;
     }
 
+    /* cannot add something to a file */
+    if (NodeFT_isFile(oNCurr) == TRUE) {
+        Path_free(oPPath);
+        return NOT_A_DIRECTORY;
+    }
+
     ulDepth = Path_getDepth(oPPath);
     if (oNCurr == NULL) /* new root! */
         ulIndex = 1;
