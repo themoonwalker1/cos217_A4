@@ -82,8 +82,8 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
             }
             oNCurr = oNChild;
         } else if (iStatus == TRUE) {
-            *poNFurthest = NULL;
-            return NOT_A_DIRECTORY;
+            oNCurr = oNChild;
+            break;
         } else {
             /* oNCurr doesn't have child with path oPPrefix:
                this is as far as we can go */
