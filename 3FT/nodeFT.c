@@ -33,15 +33,29 @@ static DynArray_T NodeFT_getChildDynArray(NodeFT_T oNNode,
 
 static int NodeFT_addChild(NodeFT_T oNParent, NodeFT_T oNChild,
                            size_t ulIndex) {
+    DynArray_T oDChildren;
+
     assert(oNParent != NULL);
     assert(oNChild != NULL);
 
-    if (DynArray_addAt(
-            NodeFT_getChildDynArray(oNParent, oNChild->bIsFile),
-            ulIndex, oNChild))
-        return SUCCESS;
-    else
-        return MEMORY_ERROR;
+    oDChildren = NodeFT_getChildDynArray(oNParent, oNChild->bIsFile);
+
+    if (DynArray_getLength(oDChildren) <= ulIndex) {
+        if (DynArray_add(
+                NodeFT_getChildDynArray(oNParent, oNChild->bIsFile),
+                oNChild))
+            return SUCCESS;
+        else
+            return MEMORY_ERROR;
+
+    } else {
+        if (DynArray_addAt(
+                NodeFT_getChildDynArray(oNParent, oNChild->bIsFile),
+                ulIndex, oNChild))
+            return SUCCESS;
+        else
+            return MEMORY_ERROR;
+    }
 }
 
 static int NodeFT_compareString(const NodeFT_T oNFirst,
