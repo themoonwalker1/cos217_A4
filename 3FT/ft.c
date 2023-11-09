@@ -68,13 +68,24 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
             *poNFurthest = NULL;
             return iStatus;
         }
-        iStatus = NodeFT_hasChild(oNCurr, oPPrefix, &bIsFile,
-                                  &ulChildID);
-        if (iStatus == TRUE) {
+
+        if (NodeFT_hasFile(oNCurr, oPPrefix, &ulChildID) == TRUE) {
             /* go to that child and continue with next prefix */
             Path_free(oPPrefix);
             oPPrefix = NULL;
-            iStatus = NodeFT_getChild(oNCurr, ulChildID, bIsFile,
+            iStatus = NodeFT_getChild(oNCurr, ulChildID, TRUE,
+                                      &oNChild);
+            if (iStatus != SUCCESS) {
+                *poNFurthest = NULL;
+                return iStatus;
+            }
+            oNCurr = oNChild;
+            break;
+        } else if (NodeFT_hasDir(oNCurr, oPPrefix, &ulChildID) == TRUE) {
+            /* go to that child and continue with next prefix */
+            Path_free(oPPrefix);
+            oPPrefix = NULL;
+            iStatus = NodeFT_getChild(oNCurr, ulChildID, FALSE,
                                       &oNChild);
             if (iStatus != SUCCESS) {
                 *poNFurthest = NULL;

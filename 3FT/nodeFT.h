@@ -17,8 +17,9 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void* pvContents,
 
 size_t NodeFT_free(NodeFT_T oNNode);
 
-boolean NodeFT_hasChild(NodeFT_T oNParent, Path_T oPPath,
-                        boolean *pbIsFile, size_t *pulChildId);
+boolean NodeFT_hasFile(NodeFT_T oNParent, Path_T oPPath, size_t *pulChildId);
+
+boolean NodeFT_hasDir(NodeFT_T oNParent, Path_T oPPath, size_t *pulChildId);
 
 Path_T NodeFT_getPath(NodeFT_T oNNode);
 

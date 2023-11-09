@@ -84,7 +84,6 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
     /* validate and set the new node's parent */
     if (oNParent != NULL) {
         size_t ulSharedDepth;
-        boolean bNodeIsFile;
 
         oPParentPath = oNParent->oPPath;
         ulParentDepth = Path_getDepth(oPParentPath);
@@ -107,7 +106,15 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
         }
 
         /* parent must not already have child with this path */
-        if (NodeFT_hasChild(oNParent, oPPath, &bNodeIsFile, &ulIndex)) {
+        if (NodeFT_hasFile(oNParent, oPPath, &ulIndex)) {
+            Path_free(psNew->oPPath);
+            free(psNew);
+            *poNResult = NULL;
+            return ALREADY_IN_TREE;
+        }
+
+        /* parent must not already have child with this path */
+        if (NodeFT_hasDir(oNParent, oPPath, &ulIndex)) {
             Path_free(psNew->oPPath);
             free(psNew);
             *poNResult = NULL;
@@ -216,28 +223,28 @@ size_t NodeFT_free(NodeFT_T oNNode) {
 
 }
 
-boolean NodeFT_hasChild(NodeFT_T oNParent, Path_T oPPath,
-                        boolean *pbIsFile, size_t *pulChildId) {
+boolean NodeFT_hasFile(NodeFT_T oNParent, Path_T oPPath, size_t *pulChildId) {
     assert(oNParent != NULL);
     assert(oPPath != NULL);
-    assert(pbIsFile != NULL);
     assert(pulChildId != NULL);
 
-    if (DynArray_bsearch(oNParent->oDDirs,
-                         (char *) Path_getPathname(oPPath), pulChildId,
-                         (int (*)(const void *,
-                                  const void *)) NodeFT_compareString)) {
-        *pbIsFile = FALSE;
-        return TRUE;
-    } else if (DynArray_bsearch(oNParent->oDFiles,
+   return (DynArray_bsearch(oNParent->oDFiles,
                                 (char *) Path_getPathname(oPPath),
                                 pulChildId,
                                 (int (*)(const void *,
-                                         const void *)) NodeFT_compareString)) {
-        *pbIsFile = TRUE;
-        return TRUE;
-    }
-    return FALSE;
+                                         const void *)) NodeFT_compareString));
+}
+
+boolean NodeFT_hasDir(NodeFT_T oNParent, Path_T oPPath, size_t *pulChildId) {
+    assert(oNParent != NULL);
+    assert(oPPath != NULL);
+    assert(pulChildId != NULL);
+
+   return (DynArray_bsearch(oNParent->oDDirs,
+                                (char *) Path_getPathname(oPPath),
+                                pulChildId,
+                                (int (*)(const void *,
+                                         const void *)) NodeFT_compareString));
 }
 
 Path_T NodeFT_getPath(NodeFT_T oNNode) {
