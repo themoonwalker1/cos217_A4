@@ -61,20 +61,20 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
     oNCurr = oNRoot;
     ulDepth = Path_getDepth(oPPath);
     for (i = 2; i <= ulDepth; i++) {
-        boolean *pbIsFile = calloc(1, sizeof(boolean));
+        boolean bIsFile;
 
         iStatus = Path_prefix(oPPath, i, &oPPrefix);
         if (iStatus != SUCCESS) {
             *poNFurthest = NULL;
             return iStatus;
         }
-        iStatus = NodeFT_hasChild(oNCurr, oPPrefix, pbIsFile,
+        iStatus = NodeFT_hasChild(oNCurr, oPPrefix, &bIsFile,
                                   &ulChildID);
         if (iStatus == TRUE) {
             /* go to that child and continue with next prefix */
             Path_free(oPPrefix);
             oPPrefix = NULL;
-            iStatus = NodeFT_getChild(oNCurr, ulChildID, *pbIsFile,
+            iStatus = NodeFT_getChild(oNCurr, ulChildID, bIsFile,
                                       &oNChild);
             if (iStatus != SUCCESS) {
                 *poNFurthest = NULL;
@@ -388,16 +388,16 @@ int FT_rmFile(const char *pcPath) {
 void *FT_getFileContents(const char *pcPath) {
     int iStatus;
     NodeFT_T oNFound = NULL;
-    void **ppvContents = NULL;
+    void *pvContents = NULL;
 
     assert(pcPath != NULL);
     assert(CheckerFT_isValid(bIsInitialized, oNRoot, ulCount));
 
     iStatus = FT_findNode(pcPath, &oNFound);
 
-    iStatus = NodeFT_getContents(oNFound, ppvContents);
+    iStatus = NodeFT_getContents(oNFound, &pvContents);
 
-    return *ppvContents;
+    return pvContents;
 }
 
 void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
@@ -405,16 +405,16 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 
     int iStatus;
     NodeFT_T oNFound = NULL;
-    void **ppvContents = NULL;
+    void *pvContents = NULL;
 
     assert(pcPath != NULL);
     assert(CheckerFT_isValid(bIsInitialized, oNRoot, ulCount));
 
     iStatus = FT_findNode(pcPath, &oNFound);
 
-    iStatus = NodeFT_setContents(oNFound, pvNewContents, ppvContents);
+    iStatus = NodeFT_setContents(oNFound, pvNewContents, &pvContents);
 
-    return *ppvContents;
+    return pvContents;
 }
 
 int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
