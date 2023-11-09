@@ -182,7 +182,7 @@ int FT_insertDir(const char *pcPath) {
     }
 
     /* cannot add something to a file */
-    if (NodeFT_isFile(oNCurr) == TRUE) {
+    if (oNCurr != NULL && NodeFT_isFile(oNCurr) == TRUE) {
         Path_free(oPPath);
         return NOT_A_DIRECTORY;
     }
@@ -310,6 +310,12 @@ int FT_insertFile(const char *pcPath, void *pvContents,
     if (oNCurr == NULL) {
         Path_free(oPPath);
         return CONFLICTING_PATH;
+    }
+
+    /* cannot add something to a file */
+    if (oNCurr != NULL && NodeFT_isFile(oNCurr)) {
+        Path_free(oPPath);
+        return NOT_A_DIRECTORY;
     }
 
     ulDepth = Path_getDepth(oPPath);
