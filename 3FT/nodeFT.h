@@ -13,7 +13,8 @@
 typedef struct NodeFT *NodeFT_T;
 
 int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void* pvContents,
-                   boolean bIsFile, NodeFT_T *poNResult);
+                   size_t ulLength, boolean bIsFile,
+                   NodeFT_T *poNResult);
 
 size_t NodeFT_free(NodeFT_T oNNode);
 
@@ -33,6 +34,8 @@ NodeFT_T NodeFT_getParent(NodeFT_T oNNode);
 int NodeFT_getContents(NodeFT_T oNNode, void **ppvContents);
 
 int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, void **ppvPrevContents);
+
+size_t NodeFT_getFileSize(NodeFT_T oNNode);
 
 boolean NodeFT_isFile(NodeFT_T oNNode);
 

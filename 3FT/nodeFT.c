@@ -21,7 +21,7 @@ struct NodeFT {
 
     /* File Variables */
     void *pvContents;
-    /* size_t ulFileLength; */
+    size_t ulFileLength;
 };
 
 static DynArray_T NodeFT_getChildDynArray(NodeFT_T oNNode,
@@ -67,7 +67,7 @@ static int NodeFT_compareString(const NodeFT_T oNFirst,
 }
 
 int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
-               boolean bIsFile,
+               size_t ulLength, boolean bIsFile,
                NodeFT_T *poNResult) {
     struct NodeFT *psNew;
     Path_T oPParentPath = NULL;
@@ -168,11 +168,13 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
 
         psNew->bIsFile = FALSE;
         psNew->pvContents = NULL;
+        psNew->ulFileLength = 0;
     } else {
         psNew->oDFiles = NULL;
         psNew->oDDirs = NULL;
         psNew->bIsFile = TRUE;
         psNew->pvContents = pvContents;
+        psNew->ulFileLength = ulLength;
     }
 
     /* Link into parent's children list */
@@ -323,6 +325,12 @@ int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, void **ppvPrevContents
    oNNode->pvContents = pvContents;
 
    return SUCCESS;
+}
+
+size_t NodeFT_getFileSize(NodeFT_T oNNode){
+    assert (oNNode != NULL);
+
+    return oNNode->ulFileLength;
 }
 
 boolean NodeFT_isFile(NodeFT_T oNNode) {

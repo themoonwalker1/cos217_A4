@@ -218,7 +218,7 @@ int FT_insertDir(const char *pcPath) {
         }
 
         /* insert the new node for this level */
-        iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents, bIsFile,
+        iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents, 0, bIsFile,
                              &oNNewNode);
         if (iStatus != SUCCESS) {
             Path_free(oPPath);
@@ -270,6 +270,9 @@ int FT_rmDir(const char *pcPath) {
 
     if (iStatus != SUCCESS)
         return iStatus;
+
+    if (NodeFT_isFile(oNFound) == TRUE)
+        return NOT_A_DIRECTORY;
 
     ulCount -= NodeFT_free(oNFound);
     if (ulCount == 0)
@@ -347,7 +350,7 @@ int FT_insertFile(const char *pcPath, void *pvContents,
         /* insert the new node for this level */
         iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents,
                              ulIndex == ulDepth,
-                             &oNNewNode);
+                             ulLength, &oNNewNode);
         if (iStatus != SUCCESS) {
             Path_free(oPPath);
             Path_free(oPPrefix);
@@ -399,6 +402,9 @@ int FT_rmFile(const char *pcPath) {
 
     if (iStatus != SUCCESS)
         return iStatus;
+
+    if (NodeFT_isFile(oNFound) == FALSE)
+        return NOT_A_FILE;
 
     ulCount -= NodeFT_free(oNFound);
     if (ulCount == 0)
@@ -456,7 +462,7 @@ int FT_stat(const char *pcPath, boolean *pbIsFile, size_t *pulSize) {
 
     if (NodeFT_isFile(oNFound)) {
         *pbIsFile = TRUE;
-        /* *pulSize = NodeFT_getFileSize(oNFound) */
+        *pulSize = NodeFT_getFileSize(oNFound);
     } else {
         *pbIsFile = FALSE;
     }
