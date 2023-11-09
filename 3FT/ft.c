@@ -349,8 +349,8 @@ int FT_insertFile(const char *pcPath, void *pvContents,
 
         /* insert the new node for this level */
         iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents,
-                             ulIndex == ulDepth,
-                             ulLength, &oNNewNode);
+                             ulLength,
+                             ulIndex == ulDepth, &oNNewNode);
         if (iStatus != SUCCESS) {
             Path_free(oPPath);
             Path_free(oPPrefix);
