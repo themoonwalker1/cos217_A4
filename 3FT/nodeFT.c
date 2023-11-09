@@ -313,7 +313,7 @@ int NodeFT_getContents(NodeFT_T oNNode, void **ppvContents) {
    return SUCCESS;
 }
 
-int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, void **ppvPrevContents) {
+int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, size_t ulNewLength, void **ppvPrevContents) {
    assert(oNNode != NULL);
    assert(ppvPrevContents != NULL);
 
@@ -323,6 +323,7 @@ int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, void **ppvPrevContents
 
    *ppvPrevContents = oNNode->pvContents;
    oNNode->pvContents = pvContents;
+   oNNode->ulFileLength = ulNewLength;
 
    return SUCCESS;
 }

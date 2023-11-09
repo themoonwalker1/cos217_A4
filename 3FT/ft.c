@@ -441,7 +441,7 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 
     iStatus = FT_findNode(pcPath, &oNFound);
 
-    iStatus = NodeFT_setContents(oNFound, pvNewContents, &pvContents);
+    iStatus = NodeFT_setContents(oNFound, pvNewContents, ulNewLength, &pvContents);
 
     return pvContents;
 }

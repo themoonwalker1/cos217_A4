@@ -33,7 +33,7 @@ NodeFT_T NodeFT_getParent(NodeFT_T oNNode);
 
 int NodeFT_getContents(NodeFT_T oNNode, void **ppvContents);
 
-int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, void **ppvPrevContents);
+int NodeFT_setContents(NodeFT_T oNNode, void *pvContents, size_t ulNewLength, void **ppvPrevContents);
 
 size_t NodeFT_getFileSize(NodeFT_T oNNode);
 
