@@ -27,116 +27,115 @@ static NodeFT_T oNRoot;
 static size_t ulCount;
 
 static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
-   int iStatus;
-   Path_T oPPrefix = NULL;
-   NodeFT_T oNCurr;
-   NodeFT_T oNChild = NULL;
-   size_t ulDepth;
-   size_t i;
-   size_t ulChildID;
+    int iStatus;
+    Path_T oPPrefix = NULL;
+    NodeFT_T oNCurr;
+    NodeFT_T oNChild = NULL;
+    size_t ulDepth;
+    size_t i;
+    size_t ulChildID;
 
-   assert(oPPath != NULL);
-   assert(poNFurthest != NULL);
+    assert(oPPath != NULL);
+    assert(poNFurthest != NULL);
 
-   /* root is NULL -> won't find anything */
-   if(oNRoot == NULL) {
-      *poNFurthest = NULL;
-      return SUCCESS;
-   }
+    /* root is NULL -> won't find anything */
+    if (oNRoot == NULL) {
+        *poNFurthest = NULL;
+        return SUCCESS;
+    }
 
-   iStatus = Path_prefix(oPPath, 1, &oPPrefix);
-   if(iStatus != SUCCESS) {
-      *poNFurthest = NULL;
-      return iStatus;
-   }
+    iStatus = Path_prefix(oPPath, 1, &oPPrefix);
+    if (iStatus != SUCCESS) {
+        *poNFurthest = NULL;
+        return iStatus;
+    }
 
-   if(Path_comparePath(NodeFT_getPath(oNRoot), oPPrefix)) {
-      Path_free(oPPrefix);
-      *poNFurthest = NULL;
-      return CONFLICTING_PATH;
-   }
-   Path_free(oPPrefix);
-   oPPrefix = NULL;
+    if (Path_comparePath(NodeFT_getPath(oNRoot), oPPrefix)) {
+        Path_free(oPPrefix);
+        *poNFurthest = NULL;
+        return CONFLICTING_PATH;
+    }
+    Path_free(oPPrefix);
+    oPPrefix = NULL;
 
-   oNCurr = oNRoot;
-   ulDepth = Path_getDepth(oPPath);
-   for(i = 2; i <= ulDepth; i++) {
-       boolean *pbIsFile = calloc(1, sizeof(boolean));
+    oNCurr = oNRoot;
+    ulDepth = Path_getDepth(oPPath);
+    for (i = 2; i <= ulDepth; i++) {
+        boolean *pbIsFile = calloc(1, sizeof(boolean));
 
-      iStatus = Path_prefix(oPPath, i, &oPPrefix);
-      if(iStatus != SUCCESS) {
-         *poNFurthest = NULL;
-         return iStatus;
-      }
-
-      if(NodeFT_hasChild(oNCurr, oPPrefix, pbIsFile, &ulChildID) && *pbIsFile == FALSE) {
-         /* go to that child and continue with next prefix */
-         Path_free(oPPrefix);
-         oPPrefix = NULL;
-         iStatus = NodeFT_getChild(oNCurr, ulChildID, FALSE, &oNChild);
-         if(iStatus != SUCCESS) {
+        iStatus = Path_prefix(oPPath, i, &oPPrefix);
+        if (iStatus != SUCCESS) {
             *poNFurthest = NULL;
             return iStatus;
-         }
-         oNCurr = oNChild;
-      }
-      else if (iStatus == SUCCESS) {
-          *poNFurthest = NULL;
-          return NOT_A_DIRECTORY;
-      }
-      else {
-         /* oNCurr doesn't have child with path oPPrefix:
-            this is as far as we can go */
-         break;
-      }
-   }
+        }
+        iStatus = NodeFT_hasChild(oNCurr, oPPrefix, pbIsFile,
+                                  &ulChildID);
+        if (iStatus == TRUE && *pbIsFile == FALSE) {
+            /* go to that child and continue with next prefix */
+            Path_free(oPPrefix);
+            oPPrefix = NULL;
+            iStatus = NodeFT_getChild(oNCurr, ulChildID, FALSE,
+                                      &oNChild);
+            if (iStatus != SUCCESS) {
+                *poNFurthest = NULL;
+                return iStatus;
+            }
+            oNCurr = oNChild;
+        } else if (iStatus == TRUE) {
+            *poNFurthest = NULL;
+            return NOT_A_DIRECTORY;
+        } else {
+            /* oNCurr doesn't have child with path oPPrefix:
+               this is as far as we can go */
+            break;
+        }
+    }
 
-   Path_free(oPPrefix);
-   *poNFurthest = oNCurr;
-   return SUCCESS;
+    Path_free(oPPrefix);
+    *poNFurthest = oNCurr;
+    return SUCCESS;
 }
 
 static int FT_findNode(const char *pcPath, NodeFT_T *poNResult) {
-   Path_T oPPath = NULL;
-   NodeFT_T oNFound = NULL;
-   int iStatus;
+    Path_T oPPath = NULL;
+    NodeFT_T oNFound = NULL;
+    int iStatus;
 
-   assert(pcPath != NULL);
-   assert(poNResult != NULL);
+    assert(pcPath != NULL);
+    assert(poNResult != NULL);
 
-   if(!bIsInitialized) {
-      *poNResult = NULL;
-      return INITIALIZATION_ERROR;
-   }
+    if (!bIsInitialized) {
+        *poNResult = NULL;
+        return INITIALIZATION_ERROR;
+    }
 
-   iStatus = Path_new(pcPath, &oPPath);
-   if(iStatus != SUCCESS) {
-      *poNResult = NULL;
-      return iStatus;
-   }
-   iStatus = FT_traversePath(oPPath, &oNFound);
-   if(iStatus != SUCCESS)
-   {
-      Path_free(oPPath);
-      *poNResult = NULL;
-      return iStatus;
-   }
+    iStatus = Path_new(pcPath, &oPPath);
+    if (iStatus != SUCCESS) {
+        *poNResult = NULL;
+        return iStatus;
+    }
+    iStatus = FT_traversePath(oPPath, &oNFound);
+    if (iStatus != SUCCESS) {
+        Path_free(oPPath);
+        *poNResult = NULL;
+        return iStatus;
+    }
 
-   if(oNFound == NULL) {
-      Path_free(oPPath);
-      *poNResult = NULL;
-      return NO_SUCH_PATH;
-   }
+    if (oNFound == NULL) {
+        Path_free(oPPath);
+        *poNResult = NULL;
+        return NO_SUCH_PATH;
+    }
 
-   if(Path_comparePath(NodeFT_getPath(oNFound), oPPath) != 0) {
-      Path_free(oPPath);
-      *poNResult = NULL;
-      return NO_SUCH_PATH;
-   }
+    if (Path_comparePath(NodeFT_getPath(oNFound), oPPath) != 0) {
+        Path_free(oPPath);
+        *poNResult = NULL;
+        return NO_SUCH_PATH;
+    }
 
-   Path_free(oPPath);
-   *poNResult = oNFound;
-   return SUCCESS;
+    Path_free(oPPath);
+    *poNResult = oNFound;
+    return SUCCESS;
 }
 
 int FT_insertDir(const char *pcPath) {
@@ -242,7 +241,8 @@ boolean FT_containsDir(const char *pcPath) {
     assert(pcPath != NULL);
 
     iStatus = FT_findNode(pcPath, &oNFound);
-    return (boolean) (iStatus == SUCCESS)  && (NodeFT_isFile(oNFound) == FALSE);
+    return (boolean) (iStatus == SUCCESS) &&
+           (NodeFT_isFile(oNFound) == FALSE);
 }
 
 int FT_rmDir(const char *pcPath) {
@@ -325,7 +325,8 @@ int FT_insertFile(const char *pcPath, void *pvContents,
         }
 
         /* insert the new node for this level */
-        iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents, ulIndex == ulDepth,
+        iStatus = NodeFT_new(oNCurr, oPPrefix, pvContents,
+                             ulIndex == ulDepth,
                              &oNNewNode);
         if (iStatus != SUCCESS) {
             Path_free(oPPath);
@@ -363,7 +364,8 @@ boolean FT_containsFile(const char *pcPath) {
 
     iStatus = FT_findNode(pcPath, &oNFound);
 
-    return (boolean) (iStatus == SUCCESS) && (NodeFT_isFile(oNFound) == TRUE);
+    return (boolean) (iStatus == SUCCESS) &&
+           (NodeFT_isFile(oNFound) == TRUE);
 }
 
 int FT_rmFile(const char *pcPath) {
