@@ -157,7 +157,7 @@ static boolean CheckerFT_treeCheck(NodeFT_T oNNode) {
             return FALSE;
         }
 
-        if (ulIndex > 0 && NodeFT_isFile(oNPrevChild) == NodeFT_isFile(oNChild)) {
+        if (ulIndex > 0) {
             if ((oNPrevChild = DynArray_get(oDChildren, ulIndex)) == NULL) {
                 fprintf(stderr,
                         "Failed to retrieve the "
@@ -166,7 +166,7 @@ static boolean CheckerFT_treeCheck(NodeFT_T oNNode) {
             }
 
             /* Check if child is in the correct position (sorted order) */
-            if (!CheckerFT_sortedSiblings(oNPrevChild, oNChild))
+            if (NodeFT_isFile(oNPrevChild) == NodeFT_isFile(oNChild) && !CheckerFT_sortedSiblings(oNPrevChild, oNChild))
                 return FALSE;
         }
         /* if recurring down one subtree results in a failed check
