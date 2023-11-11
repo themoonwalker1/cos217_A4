@@ -256,7 +256,7 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
 }
 
 size_t NodeFT_free(NodeFT_T oNNode) {
-    size_t ulIndex;
+    size_t ulIndex = 0;
     size_t ulCount = 0;
 
     assert(oNNode != NULL);
