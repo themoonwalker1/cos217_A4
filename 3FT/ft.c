@@ -465,7 +465,7 @@ void *FT_getFileContents(const char *pcPath) {
 
     iStatus = FT_findNode(pcPath, &oNFound);
     if (iStatus != SUCCESS) {
-        return NULL
+        return NULL;
     }
 
     pvContents = NodeFT_getContents(oNFound);
