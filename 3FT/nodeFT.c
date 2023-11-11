@@ -141,6 +141,7 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
     psNew = malloc(sizeof(struct NodeFT));
     if (psNew == NULL) {
         *poNResult = NULL;
+        *poNResult = NULL;
         return MEMORY_ERROR;
     }
 
@@ -280,12 +281,13 @@ size_t NodeFT_free(NodeFT_T oNNode) {
         while (DynArray_getLength(oNNode->oDFiles) != 0) {
             ulCount += NodeFT_free(DynArray_get(oNNode->oDFiles, 0));
         }
-        DynArray_free(oNNode->oDFiles);
 
         /* recursively remove directories */
         while (DynArray_getLength(oNNode->oDDirs) != 0) {
             ulCount += NodeFT_free(DynArray_get(oNNode->oDDirs, 0));
         }
+
+        DynArray_free(oNNode->oDFiles);
         DynArray_free(oNNode->oDDirs);
     }
 
@@ -363,7 +365,7 @@ void *NodeFT_getContents(NodeFT_T oNNode) {
     assert(oNNode != NULL);
     assert(oNNode->bIsFile == TRUE);
 
-    return oNNode->pvContents;;
+    return oNNode->pvContents;
 }
 
 void *NodeFT_setContents(NodeFT_T oNNode, void *pvContents,
