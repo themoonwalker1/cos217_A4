@@ -12,7 +12,7 @@
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     DynArray_T oDChildren;
     size_t ulIndex1, ulIndex2;
-    NodeFT_T oNTempNode;
+    NodeFT_T oNTempNode = NULL;
 
     assert(oNNode != NULL);
 
@@ -26,13 +26,13 @@ static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     for (ulIndex1 = 0;
          ulIndex1 < NodeFT_getNumChildren(oNNode, TRUE); ulIndex1++) {
         NodeFT_getChild(oNNode, ulIndex1, TRUE, &oNTempNode);
-        DynArray_set(oDChildren, ulIndex1, oNTempNode);
+        (void) DynArray_set(oDChildren, ulIndex1, oNTempNode);
     }
 
     for (ulIndex2 = 0;
          ulIndex2 < NodeFT_getNumChildren(oNNode, FALSE); ulIndex2++) {
         NodeFT_getChild(oNNode, ulIndex2, FALSE, &oNTempNode);
-        DynArray_set(oDChildren, ulIndex1 + ulIndex2, oNTempNode);
+        (void) DynArray_set(oDChildren, ulIndex1 + ulIndex2, oNTempNode);
     }
 
     return oDChildren;
@@ -113,20 +113,16 @@ CheckerFT_sortedSiblings(NodeFT_T oNPrevChild, NodeFT_T oNChild) {
                            Path_getPathname(NodeFT_getPath(
                                    oNPrevChild))) < 0) {
         fprintf(stderr,
-                "Children are not in sorted order\n%s\n%s\n%u\n", Path_getPathname(NodeFT_getPath(oNPrevChild)),
-                Path_getPathname(NodeFT_getPath(oNChild)), Path_compareString(NodeFT_getPath(oNChild),
-                           Path_getPathname(NodeFT_getPath(
-                                   oNPrevChild))));
+                "Children are not in sorted order: (%s) (%s)\n", Path_getPathname(NodeFT_getPath(oNPrevChild)),
+                Path_getPathname(NodeFT_getPath(oNChild)));
         return FALSE;
     }
     if (Path_compareString(NodeFT_getPath(oNChild),
                            Path_getPathname(NodeFT_getPath(
                                    oNPrevChild))) == 0) {
         fprintf(stderr,
-                "Children are duplicates\n%s\n%s\n%u\n", Path_getPathname(NodeFT_getPath(oNPrevChild)),
-                Path_getPathname(NodeFT_getPath(oNChild)), Path_compareString(NodeFT_getPath(oNChild),
-                           Path_getPathname(NodeFT_getPath(
-                                   oNPrevChild))));
+                "Children are not in sorted order: (%s) (%s)\n", Path_getPathname(NodeFT_getPath(oNPrevChild)),
+                Path_getPathname(NodeFT_getPath(oNChild)));
         return FALSE;
     }
     return TRUE;
