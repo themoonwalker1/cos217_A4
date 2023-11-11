@@ -10,11 +10,22 @@
 #include "dynarray.h"
 #include "path.h"
 
+static DynArray_T CheckerFT_addSubDirectory(NodeFT_T oNNode, DynArray_T oDChildren, boolean bIsFile) {
+    size_t ulIndex;
+    NodeFT_T oNTempNode;
+
+    assert(oNNode != NULL);
+    assert(oDChildren != NULL);
+
+    for (ulIndex = 0;
+         ulIndex < NodeFT_getNumChildren(oNNode, bIsFile); ulIndex++) {
+        NodeFT_getChild(oNNode, ulIndex, bIsFile, &oNTempNode);
+        DynArray_add(oDChildren, oNTempNode);
+    }
+}
 
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     DynArray_T oDChildren = DynArray_new(0);
-    size_t ulIndex;
-    NodeFT_T oNTempNode;
 
     assert(oNNode != NULL);
 
@@ -22,17 +33,8 @@ static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
         return oDChildren;
     }
 
-    for (ulIndex = 0;
-         ulIndex < NodeFT_getNumChildren(oNNode, TRUE); ulIndex++) {
-        NodeFT_getChild(oNNode, ulIndex, TRUE, &oNTempNode);
-        DynArray_add(oDChildren, oNTempNode);
-    }
-
-    for (ulIndex = 0;
-         ulIndex < NodeFT_getNumChildren(oNNode, FALSE); ulIndex++) {
-        NodeFT_getChild(oNNode, ulIndex, FALSE, &oNTempNode);
-        DynArray_add(oDChildren, oNTempNode);
-    }
+    CheckerFT_addSubDirectory(oNNode, oDChildren, FALSE);
+    CheckerFT_addSubDirectory(oNNode, oDChildren, TRUE);
 
     return oDChildren;
 }
@@ -155,7 +157,7 @@ static boolean CheckerFT_treeCheck(NodeFT_T oNNode) {
             return FALSE;
         }
 
-        if (ulIndex > 0) {
+        if (ulIndex > 0 && NodeFT_isFile(oNPrevChild) == NodeFT_isFile(oNChild)) {
             if ((oNPrevChild = DynArray_get(oDChildren, ulIndex)) == NULL) {
                 fprintf(stderr,
                         "Failed to retrieve the "
