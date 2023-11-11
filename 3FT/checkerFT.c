@@ -10,14 +10,6 @@
 #include "dynarray.h"
 #include "path.h"
 
-static void CheckerFT_addSubDirectory(NodeFT_T oNNode, DynArray_T oDChildren, boolean bIsFile) {
-    size_t ulIndex;
-    NodeFT_T oNTempNode;
-
-    assert(oNNode != NULL);
-    assert(oDChildren != NULL);
-}
-
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     DynArray_T oDChildren = DynArray_new(NodeFT_getNumChildren(oNNode, FALSE) +
                                                  NodeFT_getNumChildren(oNNode, TRUE));
