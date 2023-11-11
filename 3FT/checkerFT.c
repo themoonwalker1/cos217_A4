@@ -21,13 +21,13 @@ static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     for (ulIndex = 0;
          ulIndex < NodeFT_getNumChildren(oNNode, TRUE); ulIndex++) {
         NodeFT_getChild(oNNode, ulIndex, TRUE, &oNTempNode);
-        DynArray_add(oDChildren, &oNTempNode);
+        DynArray_add(oDChildren, oNTempNode);
     }
 
     for (ulIndex = 0;
          ulIndex < NodeFT_getNumChildren(oNNode, FALSE); ulIndex++) {
         NodeFT_getChild(oNNode, ulIndex, FALSE, &oNTempNode);
-        DynArray_add(oDChildren, &oNTempNode);
+        DynArray_add(oDChildren, oNTempNode);
     }
 
     return oDChildren;
