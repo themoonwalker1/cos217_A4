@@ -171,7 +171,7 @@ static boolean CheckerFT_treeCheck(NodeFT_T oNNode) {
         }
 
         if (ulIndex > 0) {
-            if ((oNPrevChild = DynArray_get(oDChildren, ulIndex)) == NULL) {
+            if ((oNPrevChild = DynArray_get(oDChildren, ulIndex - 1)) == NULL) {
                 fprintf(stderr,
                         "Failed to retrieve the "
                         "previous sibling node\n");
