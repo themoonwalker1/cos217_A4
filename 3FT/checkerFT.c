@@ -25,7 +25,7 @@ static void CheckerFT_addSubDirectory(NodeFT_T oNNode, DynArray_T oDChildren, bo
 }
 
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
-    DynArray_T oDChildren = DynArray_new(0);
+    DynArray_T oDChildren = DynArray_new(1);
 
     assert(oNNode != NULL);
 
