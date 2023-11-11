@@ -16,7 +16,11 @@ static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     size_t ulIndex;
     NodeFT_T oNTempNode;
 
-    assert(oNNode);
+    assert(oNNode != NULL);
+
+    if (NodeFT_isFile(oNNode) == TRUE) {
+        return oDChildren;
+    }
 
     for (ulIndex = 0;
          ulIndex < NodeFT_getNumChildren(oNNode, TRUE); ulIndex++) {
