@@ -102,7 +102,7 @@ static DynArray_T NodeFT_getChildDynArray(NodeFT_T oNNode,
 */
 static int NodeFT_addChild(NodeFT_T oNParent, NodeFT_T oNChild) {
     DynArray_T oDChildren;
-    size_t ulIndex;
+    size_t ulIndex = 0;
 
     assert(oNParent != NULL);
     assert(oNChild != NULL);
