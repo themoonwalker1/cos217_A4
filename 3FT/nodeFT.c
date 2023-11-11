@@ -111,7 +111,7 @@ static int NodeFT_addChild(NodeFT_T oNParent, NodeFT_T oNChild) {
 
     oDChildren = NodeFT_getChildDynArray(oNParent, oNChild->bIsFile);
 
-    ulIndex = DynArray_bsearch(
+    DynArray_bsearch(
             oDChildren, (char *) Path_getPathname(oNChild->oPPath),
             &ulIndex,
             (int (*)(const void *, const void *)) NodeFT_compareString);

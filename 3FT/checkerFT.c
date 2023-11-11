@@ -16,16 +16,13 @@ static void CheckerFT_addSubDirectory(NodeFT_T oNNode, DynArray_T oDChildren, bo
 
     assert(oNNode != NULL);
     assert(oDChildren != NULL);
-
-    for (ulIndex = 0;
-         ulIndex < NodeFT_getNumChildren(oNNode, bIsFile); ulIndex++) {
-        NodeFT_getChild(oNNode, ulIndex, bIsFile, &oNTempNode);
-        DynArray_add(oDChildren, oNTempNode);
-    }
 }
 
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
-    DynArray_T oDChildren = DynArray_new(0);
+    DynArray_T oDChildren = DynArray_new(NodeFT_getNumChildren(oNNode, FALSE) +
+                                                 NodeFT_getNumChildren(oNNode, TRUE));
+    size_t ulIndex1, ulIndex2;
+    NodeFT_T oNTempNode;
 
     assert(oNNode != NULL);
 
@@ -33,8 +30,17 @@ static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
         return oDChildren;
     }
 
-    CheckerFT_addSubDirectory(oNNode, oDChildren, FALSE);
-    CheckerFT_addSubDirectory(oNNode, oDChildren, TRUE);
+    for (ulIndex1 = 0;
+         ulIndex1 < NodeFT_getNumChildren(oNNode, TRUE); ulIndex1++) {
+        NodeFT_getChild(oNNode, ulIndex1, TRUE, &oNTempNode);
+        DynArray_addAt(oDChildren, ulIndex1, oNTempNode);
+    }
+
+    for (ulIndex2 = 0;
+         ulIndex2 < NodeFT_getNumChildren(oNNode, FALSE); ulIndex2++) {
+        NodeFT_getChild(oNNode, ulIndex2, FALSE, &oNTempNode);
+        DynArray_addAt(oDChildren, ulIndex1 + ulIndex2, oNTempNode);
+    }
 
     return oDChildren;
 }
