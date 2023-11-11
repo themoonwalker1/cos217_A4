@@ -112,9 +112,22 @@ CheckerFT_sortedSiblings(NodeFT_T oNPrevChild, NodeFT_T oNChild) {
 
     if (Path_compareString(NodeFT_getPath(oNChild),
                            Path_getPathname(NodeFT_getPath(
-                                   oNPrevChild))) <= 0) {
+                                   oNPrevChild))) < 0) {
         fprintf(stderr,
-                "Children are not in sorted order\n");
+                "Children are not in sorted order\n%s\n%s\n%u\n", Path_getPathname(NodeFT_getPath(oNPrevChild)),
+                Path_getPathname(NodeFT_getPath(oNChild)), Path_compareString(NodeFT_getPath(oNChild),
+                           Path_getPathname(NodeFT_getPath(
+                                   oNPrevChild))));
+        return FALSE;
+    }
+    if (Path_compareString(NodeFT_getPath(oNChild),
+                           Path_getPathname(NodeFT_getPath(
+                                   oNPrevChild))) == 0) {
+        fprintf(stderr,
+                "Children are duplicates\n%s\n%s\n%u\n", Path_getPathname(NodeFT_getPath(oNPrevChild)),
+                Path_getPathname(NodeFT_getPath(oNChild)), Path_compareString(NodeFT_getPath(oNChild),
+                           Path_getPathname(NodeFT_getPath(
+                                   oNPrevChild))));
         return FALSE;
     }
     return TRUE;
