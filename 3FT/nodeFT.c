@@ -44,6 +44,27 @@ struct NodeFT {
 
 /** HELPER FUNCTIONS **/
 /*
+   Compares the string representation of the absolute path of oNFirst
+   with string pcSecond (which represents another Node's path).
+
+   Returns:
+   * <0 if oNFirst is "less than" pcSecond
+   * 0 if oNFirst is "equal to" pcSecond
+   * >0 if oNFirst is "greater than" pcSecond
+
+   Precondition:
+   * oNFirst cannot be NULL
+   * pcSecond cannot be NULL
+*/
+static int NodeFT_compareString(const NodeFT_T oNFirst,
+                                const char *pcSecond) {
+    assert(oNFirst != NULL);
+    assert(pcSecond != NULL);
+
+    return Path_compareString(oNFirst->oPPath, pcSecond);
+}
+
+/*
    Retrieves the "correct" subdirectory of oNNode based on the value of
    bIsFile.
 
@@ -79,51 +100,26 @@ static DynArray_T NodeFT_getChildDynArray(NodeFT_T oNNode,
    * oNChild cannot be NULL
    * oNParent is a directory node
 */
-static int NodeFT_addChild(NodeFT_T oNParent, NodeFT_T oNChild,
-                           size_t ulIndex) {
+static int NodeFT_addChild(NodeFT_T oNParent, NodeFT_T oNChild) {
     DynArray_T oDChildren;
+    size_t ulIndex;
 
     assert(oNParent != NULL);
     assert(oNChild != NULL);
     assert(NodeFT_isFile(oNParent) == FALSE);
 
+
     oDChildren = NodeFT_getChildDynArray(oNParent, oNChild->bIsFile);
 
-    if (DynArray_getLength(oDChildren) <= ulIndex) {
-        if (DynArray_add(
-                NodeFT_getChildDynArray(oNParent, oNChild->bIsFile),
-                oNChild))
-            return SUCCESS;
+    ulIndex = DynArray_bsearch(
+            oDChildren, (char *) Path_getPathname(oNChild->oPPath),
+            &ulIndex,
+            (int (*)(const void *, const void *)) NodeFT_compareString);
 
-    } else {
-        if (DynArray_addAt(
-                NodeFT_getChildDynArray(oNParent, oNChild->bIsFile),
-                ulIndex, oNChild))
-            return SUCCESS;
-    }
+    if (DynArray_addAt(oDChildren, ulIndex, oNChild))
+        return SUCCESS;
 
     return MEMORY_ERROR;
-}
-
-/*
-   Compares the string representation of the absolute path of oNFirst
-   with string pcSecond (which represents another Node's path).
-
-   Returns:
-   * <0 if oNFirst is "less than" pcSecond
-   * 0 if oNFirst is "equal to" pcSecond
-   * >0 if oNFirst is "greater than" pcSecond
-
-   Precondition:
-   * oNFirst cannot be NULL
-   * pcSecond cannot be NULL
-*/
-static int NodeFT_compareString(const NodeFT_T oNFirst,
-                                const char *pcSecond) {
-    assert(oNFirst != NULL);
-    assert(pcSecond != NULL);
-
-    return Path_compareString(oNFirst->oPPath, pcSecond);
 }
 
 /*--------------------------------------------------------------------*/
@@ -241,7 +237,7 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
 
     /* Link into parent's children list */
     if (oNParent != NULL) {
-        iStatus = NodeFT_addChild(oNParent, psNew, ulIndex);
+        iStatus = NodeFT_addChild(oNParent, psNew);
         if (iStatus != SUCCESS) {
             Path_free(psNew->oPPath);
             free(psNew);
@@ -371,7 +367,7 @@ void *NodeFT_getContents(NodeFT_T oNNode) {
 }
 
 void *NodeFT_setContents(NodeFT_T oNNode, void *pvContents,
-                       size_t ulNewLength) {
+                         size_t ulNewLength) {
     void *pvPrevContents;
 
     assert(oNNode != NULL);
