@@ -11,27 +11,29 @@
 #include "path.h"
 
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
-    DynArray_T oDChildren = DynArray_new(NodeFT_getNumChildren(oNNode, FALSE) +
-                                                 NodeFT_getNumChildren(oNNode, TRUE));
+    DynArray_T oDChildren;
     size_t ulIndex1, ulIndex2;
     NodeFT_T oNTempNode;
 
     assert(oNNode != NULL);
 
     if (NodeFT_isFile(oNNode) == TRUE) {
-        return oDChildren;
+        return DynArray_new(0);
     }
+
+    oDChildren = DynArray_new(NodeFT_getNumChildren(oNNode, FALSE) +
+                                                 NodeFT_getNumChildren(oNNode, TRUE));
 
     for (ulIndex1 = 0;
          ulIndex1 < NodeFT_getNumChildren(oNNode, TRUE); ulIndex1++) {
         NodeFT_getChild(oNNode, ulIndex1, TRUE, &oNTempNode);
-        DynArray_addAt(oDChildren, ulIndex1, oNTempNode);
+        DynArray_set(oDChildren, ulIndex1, oNTempNode);
     }
 
     for (ulIndex2 = 0;
          ulIndex2 < NodeFT_getNumChildren(oNNode, FALSE); ulIndex2++) {
         NodeFT_getChild(oNNode, ulIndex2, FALSE, &oNTempNode);
-        DynArray_addAt(oDChildren, ulIndex1 + ulIndex2, oNTempNode);
+        DynArray_set(oDChildren, ulIndex1 + ulIndex2, oNTempNode);
     }
 
     return oDChildren;
