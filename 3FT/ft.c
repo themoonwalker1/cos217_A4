@@ -14,9 +14,11 @@
 #include "nodeFT.h"
 #include "ft.h"
 
+/*--------------------------------------------------------------------*/
+
 /*
-  A Directory Tree is a representation of a hierarchy of directories,
-  represented as an AO with 3 state variables:
+   A Directory Tree is a representation of a hierarchy of directories,
+   represented as an AO with 3 state variables:
 */
 
 /* 1. a flag for being in an initialized state (TRUE) or not (FALSE) */
@@ -26,6 +28,31 @@ static NodeFT_T oNRoot;
 /* 3. a counter of the number of nodes in the hierarchy */
 static size_t ulCount;
 
+/*--------------------------------------------------------------------*/
+
+/** Helper Functions **/
+
+/*
+   The FT_traversePath and FT_findNode functions modularize the common
+   functionality of going as far as possible down an FT towards a path
+   and returning either the node of however far was reached or the
+   node if the full path was reached, respectively.
+*/
+
+/*
+   Traverses the FT starting at the root as far as possible towards
+   absolute path oPPath. If able to traverse, returns an int SUCCESS
+   status and sets *poNFurthest to the furthest node reached (which may
+   be only a prefix of oPPath, or even NULL if the root is NULL).
+
+   Otherwise, sets *poNFurthest to NULL and returns with status:
+   * CONFLICTING_PATH if the root's path is not a prefix of oPPath
+   * MEMORY_ERROR if memory could not be allocated to complete request
+
+   Precondition:
+   * oPPath cannot be NULL
+   * poNFurthest cannot be NULL
+*/
 static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
     int iStatus;
     Path_T oPPrefix = NULL;
@@ -61,8 +88,6 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
     oNCurr = oNRoot;
     ulDepth = Path_getDepth(oPPath);
     for (i = 2; i <= ulDepth; i++) {
-        boolean bIsFile;
-
         iStatus = Path_prefix(oPPath, i, &oPPrefix);
         if (iStatus != SUCCESS) {
             *poNFurthest = NULL;
@@ -104,6 +129,21 @@ static int FT_traversePath(Path_T oPPath, NodeFT_T *poNFurthest) {
     return SUCCESS;
 }
 
+/*
+   Traverses the FT to find a node with absolute path pcPath. Returns an
+   int SUCCESS status and sets *poNResult to be the node, if found.
+
+   Otherwise, sets *poNResult to NULL and returns with status:
+   * INITIALIZATION_ERROR if the FT is not in an initialized state
+   * BAD_PATH if pcPath does not represent a well-formatted path
+   * CONFLICTING_PATH if the root's path is not a prefix of pcPath
+   * NO_SUCH_PATH if no node with pcPath exists in the hierarchy
+   * MEMORY_ERROR if memory could not be allocated to complete request
+
+   Precondition:
+   * pcPath cannot be NULL
+   * poNResult cannot be NULL
+*/
 static int FT_findNode(const char *pcPath, NodeFT_T *poNResult) {
     Path_T oPPath = NULL;
     NodeFT_T oNFound = NULL;
@@ -145,6 +185,8 @@ static int FT_findNode(const char *pcPath, NodeFT_T *poNResult) {
     *poNResult = oNFound;
     return SUCCESS;
 }
+
+/*--------------------------------------------------------------------*/
 
 int FT_insertDir(const char *pcPath) {
     int iStatus;
@@ -194,9 +236,8 @@ int FT_insertDir(const char *pcPath) {
         ulIndex = Path_getDepth(NodeFT_getPath(oNCurr)) + 1;
 
         /* oNCurr is the node we're trying to insert */
-        if (ulIndex == ulDepth + 1 && !Path_comparePath(oPPath,
-                                                        NodeFT_getPath(
-                                                                oNCurr))) {
+        if (ulIndex == ulDepth + 1
+            && !Path_comparePath(oPPath, NodeFT_getPath(oNCurr))) {
             Path_free(oPPath);
             return ALREADY_IN_TREE;
         }
@@ -423,8 +464,11 @@ void *FT_getFileContents(const char *pcPath) {
     assert(CheckerFT_isValid(bIsInitialized, oNRoot, ulCount));
 
     iStatus = FT_findNode(pcPath, &oNFound);
+    if (iStatus != SUCCESS) {
+        return NULL
+    }
 
-    iStatus = NodeFT_getContents(oNFound, &pvContents);
+    pvContents = NodeFT_getContents(oNFound);
 
     return pvContents;
 }
@@ -441,7 +485,11 @@ void *FT_replaceFileContents(const char *pcPath, void *pvNewContents,
 
     iStatus = FT_findNode(pcPath, &oNFound);
 
-    iStatus = NodeFT_setContents(oNFound, pvNewContents, ulNewLength, &pvContents);
+    if (iStatus != SUCCESS) {
+        return NULL;
+    }
+
+    pvContents = NodeFT_setContents(oNFound, pvNewContents, ulNewLength);
 
     return pvContents;
 }
@@ -500,34 +548,63 @@ int FT_destroy(void) {
     return SUCCESS;
 }
 
-static size_t FT_preOrderTraversal(NodeFT_T n, DynArray_T d, size_t i) {
+/*--------------------------------------------------------------------*/
+
+/** toString Functions **/
+
+/*
+  Performs a pre-order traversal of the tree rooted at oNParent,
+  inserting each payload to DynArray_T oDNodes beginning at index
+  ulIndex.
+
+  Returns the next unused index in oDNodes after the insertion(s).
+
+  Precondition:
+  * oDNodes cannot be NULL
+*/
+
+static size_t FT_preOrderTraversal(NodeFT_T oNParent,
+                                   DynArray_T oDNodes, size_t ulIndex) {
     size_t c;
+    int iStatus;
 
-    assert(d != NULL);
+    assert(oDNodes != NULL);
 
-    if (n != NULL) {
-        (void) DynArray_set(d, i, n);
-        i++;
-        if (NodeFT_isFile(n) == FALSE) {
-            for (c = 0; c < NodeFT_getNumChildren(n, TRUE); c++) {
-                int iStatus;
-                NodeFT_T oNChild = NULL;
-                iStatus = NodeFT_getChild(n, c, TRUE, &oNChild);
-                assert(iStatus == SUCCESS);
-                i = FT_preOrderTraversal(oNChild, d, i);
-            }
-            for (c = 0; c < NodeFT_getNumChildren(n, FALSE); c++) {
-                int iStatus;
-                NodeFT_T oNChild = NULL;
-                iStatus = NodeFT_getChild(n, c, FALSE, &oNChild);
-                assert(iStatus == SUCCESS);
-                i = FT_preOrderTraversal(oNChild, d, i);
-            }
-        }
+    if (oNParent == NULL) {
+        return ulIndex;
     }
-    return i;
+
+    (void) DynArray_set(oDNodes, ulIndex, oNParent);
+    ulIndex++;
+
+    if (NodeFT_isFile(oNParent) == TRUE) {
+        return ulIndex;
+    }
+
+    for (c = 0; c < NodeFT_getNumChildren(oNParent, TRUE); c++) {
+        NodeFT_T oNChild = NULL;
+        iStatus = NodeFT_getChild(oNParent, c, TRUE, &oNChild);
+        assert(iStatus == SUCCESS);
+        ulIndex = FT_preOrderTraversal(oNChild, oDNodes, ulIndex);
+    }
+    for (c = 0; c < NodeFT_getNumChildren(oNParent, FALSE); c++) {
+        NodeFT_T oNChild = NULL;
+        iStatus = NodeFT_getChild(oNParent, c, FALSE, &oNChild);
+        assert(iStatus == SUCCESS);
+        ulIndex = FT_preOrderTraversal(oNChild, oDNodes, ulIndex);
+    }
+
+    return ulIndex;
 }
 
+/*
+  Alternate version of strlen that uses pulAcc as an in-out parameter
+  to accumulate a string length, rather than returning the length of
+  oNNode's path, and also always adds one addition byte to the sum.
+
+  Precondition:
+  * pulAcc cannot be NULL
+*/
 static void FT_strlenAccumulate(NodeFT_T oNNode, size_t *pulAcc) {
     assert(pulAcc != NULL);
 
@@ -535,6 +612,14 @@ static void FT_strlenAccumulate(NodeFT_T oNNode, size_t *pulAcc) {
         *pulAcc += (Path_getStrLength(NodeFT_getPath(oNNode)) + 1);
 }
 
+/*
+  Alternate version of strcat that inverts the typical argument
+  order, appending oNNode's path onto pcAcc, and also always adds one
+  newline at the end of the concatenated string.
+
+  Precondition:
+  * pulAcc cannot be NULL
+*/
 static void FT_strcatAccumulate(NodeFT_T oNNode, char *pcAcc) {
     assert(pcAcc != NULL);
 
