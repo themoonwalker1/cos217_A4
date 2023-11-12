@@ -184,7 +184,7 @@ boolean CheckerFT_Node_isValid(NodeFT_T oNNode) {
 
     /* Node is root, so cannot check parent or sibling invariants */
     oNParent = NodeFT_getParent(oNNode);
-    if (oNParent != NULL) {
+    if (oNParent == NULL) {
         return TRUE;
     }
 
