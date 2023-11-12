@@ -8,7 +8,7 @@ Praneeth Bhandaru
 ------------------------------------------------------------------------
 Student 2: What is your name?
 
-
+None
 
 ------------------------------------------------------------------------
 Student 1: What authorized sources of information did you use to
@@ -17,7 +17,16 @@ information given in the "Policies" web page (also available on armlab
 in the file ~cos217/AuthorizedSourcesList ) to this section of the
 readme file, and edit it as appropriate.
 
+The course's lectures.
 
+The course's precepts.
+
+The course's website.
+
+Documents that are referenced directly by the course's website. Such
+documents include the course's lecture slides and precept handouts.
+
+Professor Moretti
 
 ------------------------------------------------------------------------
 Student 2: What authorized sources of information did you use to
@@ -26,7 +35,7 @@ information given in the "Policies" web page (also available on armlab
 in the file ~cos217/AuthorizedSourcesList ) to this section of the
 readme file, and edit it as appropriate.
 
-
+None
 
 ------------------------------------------------------------------------
 Student 1: What unauthorized sources of information did you use to
@@ -40,7 +49,7 @@ nature of the interaction, may additionally require the interaction
 being reported to the Committee on Discipline. Write "None" if you used
 no unauthorized sources of information.
 
-
+None
 
 ------------------------------------------------------------------------
 Student 2: What unauthorized sources of information did you use to
@@ -54,32 +63,42 @@ nature of the interaction, may additionally require the interaction
 being reported to the Committee on Discipline. Write "None" if you used
 no unauthorized sources of information.
 
-
+None
 
 ------------------------------------------------------------------------
 Student 1: What is your assessment of the assignment? Was it helpful?
 Was it fun?
 
-
+This assignment was extremely long, and while it was an extremely
+helpful and rigorous way for us to learn how to debug and how to use
+gbd, I personally think that there needs to be a little more teaching
+done about the topic before diving into it. I am a first year who didn't
+take COS 126, so this may have been covered in that coursed, but it was
+a pretty steep learning curve for me to understand how to debug
+efficiently. The implementation of the FT data structure was not that
+hard to do as there is a lot of pre-written code for it, but maybe a
+little too much code that it didn't feel like that much work at all.
 
 ------------------------------------------------------------------------
 Student 2: What is your assessment of the assignment? Was it helpful?
 Was it fun?
 
-
+None.
 
 ------------------------------------------------------------------------
 (optional) What information can you provide about your submission that
 will help your grader to grade it in the most favorable light? In
 particular, what bugs are in your submission?
 
-
+N/A
 
 ------------------------------------------------------------------------
 What warnings does splint generate for Part 2's checker, and what are
 your disagreements with them? Copy the splint warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
+
+   /* None of these warnings are for checkerDT.c */
 
 Splint 3.1.2 --- 20 Aug 2022
 
@@ -100,8 +119,6 @@ path.h:94:13: Function exported but not used outside path:
 
 Finished checking --- 4 code warnings
 
-   /* None of these warnings are for checkerDT.c */
-
 ------------------------------------------------------------------------
 What warnings does critTer generate on checkerDT.c, and what are your
 disagreements with them? Copy the critTer warnings here, and express
@@ -116,7 +133,38 @@ your disagreements with them? Copy the splint warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
+splint ft.c dynarray.c path.c nodeFT.c checkerFT.c
+---
+Splint 3.1.2 --- 20 Aug 2022
 
+/*
+   This function, Path_getComponent, serves as an "getter" of the
+   components of a "Path" object, which could otherwise not be accessed
+   by a client. Even though it is not utilized outside of the path.c
+   module, its presence is crucial for potential future uses of the
+   implementation/API, so making it static is not a good implementation.
+*/
+path.h:94:13: Function exported but not
+              used outside path: Path_getComponent
+  A declaration is exported, but not used outside
+  this module. Declaration can use static qualifier.
+  (Use -exportlocal to inhibit warning)
+   path.c:316:1: Definition of Path_getComponent
+
+/*
+   This function, NodeFT_compare, serves as a "official" way to compare
+   two "NodeFT_T" objects, which could not be written by a client who
+   uses the API as they would not know the implementation that we have
+   used due to abstraction. Even though it is not utilized outside of
+   the path.c module, its presence is crucial for potential future uses
+   of the implementation/API, so making it static is not a good
+   implementation.
+*/
+nodeFT.h:193:5: Function exported but not used outside
+                nodeFT: NodeFT_compare
+   nodeFT.c:457:1: Definition of NodeFT_compare
+
+Finished checking --- 2 code warnings
 
 ------------------------------------------------------------------------
 What warnings does critTer generate on your Part 3 code, and what are
@@ -124,7 +172,27 @@ your disagreements with them? Copy the critTer warnings here, and
 express your disagreement after each warning. If there are no
 warnings, then write "None."
 
+armlab01:~/cos217/cos217_A4/3FT$ critTer ft.c
 
+Checking ft.c
+
+   /* told to ignore */
+   ft.c: line 667: low priority:
+   A file should contain no more than 15 functions;
+   this file contains 17 functions
+
+   /* pvContents can be NULL so no need to assert */
+   ft.c: line 332: medium priority:
+   Do you want to validate 'pvContents' through an assert?
+
+   /* pvNewContents can be NULL so no need to assert */
+   ft.c: line 483: medium priority:
+   Do you want to validate 'pvNewContents' through an assert?
+
+   /* told to ignore */
+   ft.c: line 666: low priority:
+   A source code file should contain fewer than 500 lines;
+   this file contains 667 lines
 
 ------------------------------------------------------------------------
 For each of the five faulty BDT implementations required by Step
