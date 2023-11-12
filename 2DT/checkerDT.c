@@ -83,7 +83,7 @@ CheckerDT_sortedSiblings(Node_T oNPrevChild, Node_T oNChild) {
                            Path_getPathname(Node_getPath(
                                    oNPrevChild))) <= 0) {
         fprintf(stderr,
-                "Children are not in sorted order:\n\t- %s\n\t- %s\n",
+                "Children are not in sorted order: (%s) (%s)\n",
                 Node_toString(oNPrevChild), Node_toString(oNChild));
         return FALSE;
     }
