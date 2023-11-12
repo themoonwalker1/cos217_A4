@@ -46,8 +46,13 @@ struct NodeFT {
 
 #ifndef NDEBUG
 
-/* Check the invariants of oNNode. Return 1 (TRUE) iff oNNode
-   is in a valid state. */
+/*
+   Check the invariants of oNNode.
+
+   Returns:
+   * 1 (TRUE) iff oNNode is in a valid state
+   * 0 (FALSE) iff oNNode is in a invalid state
+*/
 static int NodeFT_isValid(NodeFT_T oNNode)
 {
     if (oNNode == NULL) return 0;
@@ -141,10 +146,11 @@ static int NodeFT_addChild(NodeFT_T oNParent, NodeFT_T oNChild) {
 
     oDChildren = NodeFT_getChildDynArray(oNParent, oNChild->bIsFile);
 
+    /* get which index to add child at */
     DynArray_bsearch(
-            oDChildren, (char *) Path_getPathname(oNChild->oPPath),
+            oDChildren, oNChild,
             &ulIndex,
-            (int (*)(const void *, const void *)) NodeFT_compareString);
+            (int (*)(const void *, const void *)) NodeFT_compare);
 
     if (DynArray_addAt(oDChildren, ulIndex, oNChild))
         return SUCCESS;
@@ -237,6 +243,7 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
 
     psNew->oNParent = oNParent;
 
+    /* initialize node as directory */
     if (bIsFile == FALSE) {
         /* initialize the new node */
         psNew->oDDirs = DynArray_new(0);
@@ -259,7 +266,9 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
         psNew->bIsFile = FALSE;
         psNew->pvContents = NULL;
         psNew->ulFileLength = 0;
-    } else {
+    }
+    /* initialize node as file */
+    else {
         psNew->oDFiles = NULL;
         psNew->oDDirs = NULL;
         psNew->bIsFile = TRUE;
@@ -267,7 +276,7 @@ int NodeFT_new(NodeFT_T oNParent, Path_T oPPath, void *pvContents,
         psNew->ulFileLength = ulLength;
     }
 
-    /* Link into parent's children list */
+    /* link into parent's children list */
     if (oNParent != NULL) {
         iStatus = NodeFT_addChild(oNParent, psNew);
         if (iStatus != SUCCESS) {
@@ -310,12 +319,12 @@ size_t NodeFT_free(NodeFT_T oNNode) {
     }
 
     if (oNNode->bIsFile == FALSE) {
-        /* recursively remove Files */
+        /* recursively remove FILES */
         while (DynArray_getLength(oNNode->oDFiles) != 0) {
             ulCount += NodeFT_free(DynArray_get(oNNode->oDFiles, 0));
         }
 
-        /* recursively remove directories */
+        /* recursively remove DIRECTORIES */
         while (DynArray_getLength(oNNode->oDDirs) != 0) {
             ulCount += NodeFT_free(DynArray_get(oNNode->oDDirs, 0));
         }

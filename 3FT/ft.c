@@ -163,6 +163,8 @@ static int FT_findNode(const char *pcPath, NodeFT_T *poNResult) {
         *poNResult = NULL;
         return iStatus;
     }
+
+    /* find the closest ancestor */
     iStatus = FT_traversePath(oPPath, &oNFound);
     if (iStatus != SUCCESS) {
         Path_free(oPPath);
@@ -170,12 +172,14 @@ static int FT_findNode(const char *pcPath, NodeFT_T *poNResult) {
         return iStatus;
     }
 
+    /* no ancestor */
     if (oNFound == NULL) {
         Path_free(oPPath);
         *poNResult = NULL;
         return NO_SUCH_PATH;
     }
 
+    /* "closest" ancestor is not the node itself */
     if (Path_comparePath(NodeFT_getPath(oNFound), oPPath) != 0) {
         Path_free(oPPath);
         *poNResult = NULL;
@@ -584,6 +588,7 @@ static size_t FT_preOrderTraversal(NodeFT_T oNParent,
         return ulIndex;
     }
 
+    /* collect children that are FILES before DIRECTORIES */
     for (c = 0; c < NodeFT_getNumChildren(oNParent, TRUE); c++) {
         NodeFT_T oNChild = NULL;
         iStatus = NodeFT_getChild(oNParent, c, TRUE, &oNChild);
