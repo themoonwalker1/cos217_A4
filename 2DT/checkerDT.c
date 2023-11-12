@@ -125,18 +125,20 @@ static boolean CheckerDT_treeCheck(Node_T oNNode) {
             return FALSE;
         }
 
-        if (Node_getChild(oNNode, ulIndex - 1, &oNPrevChild) !=
-            SUCCESS) {
-            fprintf(stderr,
-                    "Failed to retrieve the "
-                    "previous sibling node\n");
-            return FALSE;
-        }
-
         /* Check if child is in the correct position (sorted order) */
-        if (ulIndex > 0 &&
-            !CheckerDT_sortedSiblings(oNPrevChild, oNChild))
-            return FALSE;
+        if (ulIndex > 0) {
+
+            if (Node_getChild(oNNode, ulIndex - 1, &oNPrevChild) !=
+                SUCCESS) {
+                fprintf(stderr,
+                        "Failed to retrieve the "
+                        "previous sibling node\n");
+                return FALSE;
+            }
+
+            if (!CheckerDT_sortedSiblings(oNPrevChild, oNChild))
+                return FALSE;
+        }
 
         /* if recurring down one subtree results in a failed check
            farther down, passes the failure back up immediately */
