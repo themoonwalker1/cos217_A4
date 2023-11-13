@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------*/
 /* checkerFT.c                                                        */
-/* Author:                                                            */
+/* Author: Praneeth Bhandaru                                          */
 /*--------------------------------------------------------------------*/
 
 #include <assert.h>
@@ -13,8 +13,12 @@
 
 /** Helper Functions **/
 
-/* Returns a combined DynArray_T of the child FILES and DIRECTORIES
-   nodes under oNNode. */
+/*
+   Returns a combined DynArray_T of the child FILES and DIRECTORIES
+   nodes under oNNode.
+
+   ** Returned DynArray_T must be freed by the caller! **
+*/
 static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     DynArray_T oDChildren;
     size_t ulIndex1, ulIndex2;
@@ -47,9 +51,11 @@ static DynArray_T CheckerFT_combineChildren(NodeFT_T oNNode) {
     return oDChildren;
 }
 
-/* Checks whether oNPrevChild is "less than or equal to" oNChild. Return
+/*
+   Checks whether oNPrevChild is "less than or equal to" oNChild. Return
    TRUE if it is "less than or equal to", otherwise return FALSE.
-   Precondition: oNPrevChild and oNChild are not NULL. */
+   Precondition: oNPrevChild and oNChild are not NULL.
+*/
 static boolean
 CheckerFT_sortedSiblings(NodeFT_T oNPrevChild, NodeFT_T oNChild) {
 
@@ -116,6 +122,7 @@ static boolean CheckerFT_treeCheck(NodeFT_T oNNode) {
             fprintf(stderr,
                     "getNumChildren claims more children than "
                     "getChild returns\n");
+            DynArray_free(oDChildren);
             return FALSE;
         }
 
@@ -126,19 +133,25 @@ static boolean CheckerFT_treeCheck(NodeFT_T oNNode) {
                 fprintf(stderr,
                         "Failed to retrieve the "
                         "previous sibling node\n");
+                DynArray_free(oDChildren);
                 return FALSE;
             }
 
             if (NodeFT_isFile(oNPrevChild) == NodeFT_isFile(oNChild) &&
-                !CheckerFT_sortedSiblings(oNPrevChild, oNChild))
+                !CheckerFT_sortedSiblings(oNPrevChild, oNChild)) {
+                DynArray_free(oDChildren);
                 return FALSE;
+            }
         }
 
         /* if recurring down one subtree results in a failed check
            farther down, passes the failure back up immediately */
-        if (!CheckerFT_treeCheck(oNChild))
+        if (!CheckerFT_treeCheck(oNChild)) {
+            DynArray_free(oDChildren);
             return FALSE;
+        }
     }
+    DynArray_free(oDChildren);
 
     return TRUE;
 }
@@ -164,6 +177,8 @@ static size_t CheckerFT_countNodes(NodeFT_T oNNode) {
             count += CheckerFT_countNodes(oNChild);
         }
     }
+
+    DynArray_free(oDChildren);
     return count;
 }
 
@@ -209,6 +224,7 @@ boolean CheckerFT_Node_isValid(NodeFT_T oNNode) {
         if ((oNChild = DynArray_get(oDChildren, ulIndex)) == NULL) {
             fprintf(stderr,
                     "Failed to retrieve a sibling node\n");
+            DynArray_free(oDChildren);
             return FALSE;
         }
 
@@ -221,9 +237,11 @@ boolean CheckerFT_Node_isValid(NodeFT_T oNNode) {
                     "(%s) (%s)\n",
                     Path_getPathname(oPNPath),
                     Path_getPathname(oSPath));
+            DynArray_free(oDChildren);
             return FALSE;
         }
     }
+    DynArray_free(oDChildren);
 
     return TRUE;
 }
