@@ -81,9 +81,18 @@ CheckerDT_sortedSiblings(Node_T oNPrevChild, Node_T oNChild) {
 
     if (Path_compareString(Node_getPath(oNChild),
                            Path_getPathname(Node_getPath(
-                                   oNPrevChild))) <= 0) {
+                                   oNPrevChild))) < 0) {
         fprintf(stderr,
                 "Children are not in sorted order: (%s) (%s)\n",
+                Node_toString(oNPrevChild), Node_toString(oNChild));
+        return FALSE;
+    }
+
+    if (Path_compareString(Node_getPath(oNChild),
+                           Path_getPathname(Node_getPath(
+                                   oNPrevChild))) == 0) {
+        fprintf(stderr,
+                "Siblings have non-unique paths: (%s) (%s)\n",
                 Node_toString(oNPrevChild), Node_toString(oNChild));
         return FALSE;
     }

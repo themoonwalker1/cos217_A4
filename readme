@@ -90,7 +90,9 @@ None.
 will help your grader to grade it in the most favorable light? In
 particular, what bugs are in your submission?
 
-N/A
+My checker functions for both part 2 and 3 are not particularly
+efficient as it does multiple traversals over the tree or over sibling
+nodes to validate their states.
 
 ------------------------------------------------------------------------
 What warnings does splint generate for Part 2's checker, and what are
@@ -218,6 +220,7 @@ the error manifests itself or is "noticed" by the client.
 ------------------------------------------------------------------------
 What are your critiques of the given DT implementations, as
 specified in Step 2.5?
+
 nodeDT.h:
 The parameter ordering in the function declarations should be consistent
 across functions. For example, in 'Node_new', you have 'Path_T oPPath,
@@ -228,7 +231,12 @@ Another potential change is to reorder the function declarations so that
 similar functions are grouped together. For example, all of the
 getters should be together (Node_hasChild currently separates some
 of them).
-nodeDTGood.c:
+
+Spelling mistake in comment of Node_getParent:
+    Returns _a the_ parent node of oNNode.
+
+
+nodeDTGood.c
     - Global Variables:
         The name of the struct 'node' should be changed so that it
         defines the purpose of the structure better. For example,
@@ -237,6 +245,8 @@ nodeDTGood.c:
         scenario, calling it DTNode would also be fine as it only
         contains the information that would be necessary for a DT
         implementation.
+
+        Maybe have an internal check for validation (like dynarray).
     - Node_addChild:
         The else statement is unnecessary, and can be omitted with
         'return MEMORY_ERROR' being the last line of the function.
@@ -253,12 +263,10 @@ nodeDTGood.c:
         This may also be defined in the a4def.h as it seems to appear in
         other files as well.
     - Node_free:
-        For the nested if statement, we can combine the conditions into
-        one if statement, with the inner if statement condition appended
-        to the outer condition with a '&&' operator. The second
-        condition would never be executed if the first one is false, so
-        the statement would work correctly. Also, adding the curly
-        brackets would improve readability.
+        Putting the DynArray_bsearch in the if statement itself makes
+        the code not easily readable, so creating a variable such as
+        iFound or similar that stores the return value would be good.
+        Also, adding the curly brackets would improve readability.
     - Node_getPath:
         None
     - Node_hasChild:
@@ -279,6 +287,16 @@ Reorder the function declarations so that they are in a more meaningful
 order. For example, the initialization and destroy functions should be
 at the top of the file (as they are in theory the most important),
 followed by insert, contains, and rm, with toString in the end.
+
+In the comment for DT_insert, there is a extra possible return value -
+"NO_SUCH_PATH" returned by the function Path_getPrefix. It should add
+the following to the possible return values in the comment with the
+appropriate description of what it means in the context of the input
+parameters.
+
+In DT_rm comment, there is a type "path path pCPath" when it should be
+"path pCPath".
+
 dtGood.c:
     - Global Variables:
         None
@@ -289,7 +307,7 @@ dtGood.c:
         would be the enum value + 1).
 
         Change the variable name 'i' to be more descriptive of the type
-        and functionality of the variable. ex: 'size_t ulIndex;'
+        and functionality of the variable. ex: 'size_t ulCurrDepth;'
     - DT_findNode:
         None
     - DT_insert:
@@ -342,6 +360,12 @@ dtGood.c:
         and directly appending the path toString to it. This improvement
         enhances the program's efficiency and speed, but not the
         complexity.
+
+        Instead of doing Path_getPathname(Node_getPath(oNNode)), calling
+        the toString function of the Node would be the correct way to
+        do the same thing (best practice as it uses api commands).
+        However, this introduces the necessity to free the toString
+        value that was returned.
     - DT_toString:
         None
 path.c:
@@ -386,14 +410,23 @@ dynarray.c:
         file with a fitting name. '0' could be 'MEMORY_ERROR' and '1'
         could be 'SUCCESS'.
     - DynArray_grow:
+        None
     - DynArray_new:
+        None
     - DynArray_free:
+        None
     - DynArray_getLength:
+        None
     - DynArray_get:
-    - DynArray_set :
+        None
+    - DynArray_set:
+        None
     - DynArray_add:
+        None
     - DynArray_addAt:
+        None
     - DynArray_removeAt:
+        None
     - DynArray_toArray:
         None
     - DynArray_map:

@@ -72,7 +72,7 @@ CheckerFT_sortedSiblings(NodeFT_T oNPrevChild, NodeFT_T oNChild) {
                            Path_getPathname(NodeFT_getPath(
                                    oNPrevChild))) == 0) {
         fprintf(stderr,
-                "Children are duplicates: (%s) (%s)\n",
+                "Siblings have non-unique paths: (%s) (%s)\n",
                 Path_getPathname(NodeFT_getPath(oNPrevChild)),
                 Path_getPathname(NodeFT_getPath(oNChild)));
         return FALSE;
